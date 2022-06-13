@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 13:39:09 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/10 16:05:58 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/13 18:34:37 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,10 @@ class Client
 			nickname = "";
 			msg = "";
 			username = "";
+			connected = false;
+			password = false;
 		};
+
 		~Client() {};
 		Client(const Client &other) 		{*this = other;};
 		Client & operator=(const Client &other)
@@ -38,7 +41,7 @@ class Client
 			this->nickname = other.nickname;
 			this->msg = other.msg;
 			this->username = other.username;
-			this->chanels = other.chanels;
+			this->channels = other.channels;
 			return *this;
 		};
 
@@ -47,7 +50,9 @@ class Client
 		string			nickname;
 		string 			msg;
 		string			username;
-		vector<string>	chanels;
+		vector<string>	channels;
+		bool 			connected;
+		bool			password;
 
 	private:
 };
