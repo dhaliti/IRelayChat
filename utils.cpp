@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/13 16:31:27 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/13 17:43:24 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/14 11:20:08 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ void isConnected(Client &client, int &index)
 		client.connected = true;
 		string message = ":irc.serv 001 " + client.nickname + " :Welcome to the Internet Relay Network " + client.nickname + "!" + client.username +"@irc.serv\n";
 		send(index, message.c_str(), message.size(), 0);
+		botWelcome(client, index);
 	}
 }
 

@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:28:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/13 17:43:47 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/14 11:33:49 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,3 +35,6 @@ void 	ft_clients(Client *clients);
 bool 	notEmpty(char *str, int index);
 bool 	newNick(char *str, Client *clients);
 int 	searchNick(Client *clients, string &nick);
+void 	newClient(Client *clients, int &index);
+void 	botWelcome(Client &clients, int &index);
+void 	botCommand(Client *clients, int &index, char **ident2, int &j);

@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/13 15:22:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/13 19:00:00 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/14 11:18:38 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,7 +120,7 @@ int main(int ac, char **av)
 					if (clients[index].id == index)
 						ft_commands(clients, index, bufRead, password);
 					else
-						clients[index].id = index;
+						newClient(clients, index);
                     break;
                 }
             }

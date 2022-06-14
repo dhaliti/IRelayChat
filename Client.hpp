@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 13:39:09 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/13 18:34:37 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/14 14:11:19 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,9 @@ class Client
 		};
 
 		~Client() {};
+
 		Client(const Client &other) 		{*this = other;};
+		
 		Client & operator=(const Client &other)
 		{
 			this->id = other.id;
