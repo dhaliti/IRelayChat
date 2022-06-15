@@ -6,7 +6,7 @@
 /*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/13 15:22:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 12:11:45 by flcollar         ###   ########.fr       */
+/*   Updated: 2022/06/15 14:14:11 by flcollar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,20 @@ fd_set readyWrite;
 
 char bufRead[1024];
 char bufWrite[1024];
+Client clients[1024];
+
+void force_quit(int)
+{
+	cout << endl << "Force quiting.." << endl;
+	for (size_t i = 0; i < 1024; i++) {
+		FD_CLR(i, &active);
+		close(i);
+	}
+	exit (0);
+}
 
 void fatal_error()
- {
+{
     cerr << "Fatal error\n";
     exit (1);
 }
@@ -64,7 +75,6 @@ int main(int ac, char **av)
 {
 	int port;
 	string password;
-	Client clients[1024];
 
 	checkArgs(ac, av, port, password);
     bzero(&clients, sizeof(clients));
@@ -75,7 +85,6 @@ int main(int ac, char **av)
         fatal_error();
 	if (fcntl(serverSock, F_SETFL, O_NONBLOCK) == -1)
 		fatal_error();
-
 
     _max = serverSock;
     FD_SET(serverSock, &active);
@@ -91,6 +100,7 @@ int main(int ac, char **av)
     if (listen(serverSock, 128) < 0)
         fatal_error();
 
+	signal(SIGINT, force_quit);
     while (1)
 	{
         readyRead = readyWrite = active;
@@ -110,7 +120,7 @@ int main(int ac, char **av)
 
                 FD_SET(clientSock, &active);
                 cout << "Client #" << clients[clientSock].id << " just arrived";
-                break ;
+                //break ;
             }
 
             if (FD_ISSET(index, &readyRead) && index != serverSock)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   IRC.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
+/*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:28:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 10:29:04 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/15 12:51:42 by flcollar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "Client.hpp"
+#include <signal.h>
 
 using namespace std;
 

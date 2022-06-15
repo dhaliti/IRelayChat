@@ -6,7 +6,7 @@
 /*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:25:05 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 12:03:17 by flcollar         ###   ########.fr       */
+/*   Updated: 2022/06/15 15:54:23 by flcollar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,9 @@ static void channelKick(Client *clients, int &index, char **ident2, int &j)
 {
 	if (!ident2[j + 1] || !ident2[j + 2]) //le channel et username du kické doivent etre precises;
 	{
-		string error = ":irc.serv 461 PART :Not enough parameters\n";
+		string error = ":irc.serv 461 " + string(ident2[j]) + " :Not enough parameters\n";
 		sendAll(index, error);
+		return ;
 	}
 	string user = string(ident2[j + 2]);
 	string channel = string(ident2[j + 1]);
@@ -70,7 +71,7 @@ static void channelKick(Client *clients, int &index, char **ident2, int &j)
 		}
 	}
 	// Erreur: le kicker n'est pas dans le channel;
-	sendAll(d,  string(":irc.serv 442 "  + string(ident2[j + 1]) + " :You're not on that channel\n"));
+	sendAll(index,  string(":irc.serv 442 "  + string(ident2[j + 1]) + " :You're not on that channel\n"));
 }
 
 /******************************PART FROM CHANNEL*******************************/
@@ -125,9 +126,15 @@ static void joinChannel(Client *clients, int &index, char **ident2, int &j)
 		return;
 	}
 	if (!ident2[j + 1])
+	{
+		sendAll(index, ":irc.serv 461 " + string(ident2[j]) + " :Not enough parameters\n");
 		return ;
+	}
 	if (ident2[j + 1][0] != '#')
+	{
+		sendAll(index, ":irc.serv 475 " + string(ident2[j + 1]) + " :Cannot join channel\n");
 		return;
+	}
 	for (size_t i = 0; i < clients[index].channels.size(); i++)
 	{
 		if (clients[index].channels[i] == string(ident2[j + 1]))
@@ -234,16 +241,15 @@ static void privateMsg(Client *clients, int &index, char **ident2, int &j)
 
 static void setPass(Client *clients, int &index, char **ident2, int &j, string &password)
 {
-	if(ident2[j + 1] && string(ident2[j + 1]) == password)
+	if (clients[index].password)
+		sendAll(index, ":irc.serv 462 :You may not reregister\n");
+	else if(ident2[j + 1] && string(ident2[j + 1]) == password)
 	{
 		clients[index].password = true;
 		isConnected(clients[index], index);
 	}
 	else
-	{
-		string message = ":irc.serv 464 :Password incorrect\n";
-		send(index, message.c_str(), message.size(), 0);
-	}
+		sendAll(index, ":irc.serv 464 :Password incorrect\n");
 }
 
 /***********************************SETNICK************************************/
@@ -275,7 +281,9 @@ static void setNick(Client *clients, int &index, char **ident2, int &j)
 
 static void setUser(Client *clients, int &index, char **ident2, int &j)
 {
-	if (ident2[j + 1] && notEmpty(ident2[j + 1], 1))
+	if (!clients[index].username.empty())
+		sendAll(index, ":irc.serv 462 :You may not reregister\n");
+	else if (ident2[j + 1] && notEmpty(ident2[j + 1], 1))
 	{
 		string user = string(ident2[j + 1]);
 		clients[index].username = user;
@@ -298,7 +306,7 @@ void ft_commands(Client *clients, int &index, const char *bufRead, string &passw
 		 char **ident2 = ft_split2(ident[i], "\t ");
 		 while(ident2 && ident2[++j])
 		 {
-			 string cmd = string(ident2[j]);
+			string cmd(ident2[j]);
 			if (cmd == "NICK")
 				setNick(clients, index, ident2, j);
 			else if (cmd == "USER")
@@ -317,7 +325,8 @@ void ft_commands(Client *clients, int &index, const char *bufRead, string &passw
 				channelPart(clients, index, ident2, j);
 			else if (cmd == "KICK")
 				channelKick(clients, index, ident2, j);
-				//NOTICE
+			else if (cmd == "NOTICE")
+				privateMsg(clients, index, ident2, j);
 			else
 			{
 				if (isUpper(cmd))
