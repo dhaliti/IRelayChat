@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Commands.cpp                                       :+:      :+:    :+:   */
+/*   commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
+/*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:25:05 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 10:29:20 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/15 12:03:17 by flcollar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -214,7 +214,6 @@ static void personnalMessage(Client *clients, int &index, char **ident2, int &j)
 static void privateMsg(Client *clients, int &index, char **ident2, int &j)
 {
 	cout << "privateMessage\n";
-	int d;
 	if (ident2[j + 1] && ident2[j + 2])
 	{
 		if (string(ident2[j + 1]) == "BOT")

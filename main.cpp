@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
+/*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/13 15:22:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 12:08:03 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/15 12:11:45 by flcollar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ static void checkArgs(int &ac, char **av, int &port, string &password)
         cerr << "Wrong number of arguments\n" << "Usage: ./ircserv port password\n";
 		exit(1);
 	}
-	int port = atoi(av[1]);
+	port = atoi(av[1]);
 	password = string(av[2]);
 	if (port <= 0)
 	{
@@ -66,7 +66,7 @@ int main(int ac, char **av)
 	string password;
 	Client clients[1024];
 
-	check_args(ac, av, port, password);
+	checkArgs(ac, av, port, password);
     bzero(&clients, sizeof(clients));
     FD_ZERO(&active);
 
