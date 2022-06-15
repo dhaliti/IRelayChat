@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/13 15:22:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 10:19:37 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/15 11:20:59 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include "Client.hpp"
 #include "IRC.hpp"
+#include <fcntl.h>
 using namespace std;
 
 int _max = 0;
@@ -62,6 +63,7 @@ int main(int ac, char **av)
     int serverSock = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSock < 0)
         fatal_error();
+	fcntl(serverSock, F_SETFL, O_NONBLOCK);
 
     _max = serverSock;
     FD_SET(serverSock, &active);
@@ -103,27 +105,67 @@ int main(int ac, char **av)
             if (FD_ISSET(index, &readyRead) && index != serverSock)
 			{
                 int res = recv(index, bufRead, 1024, 0);
-				//bufRead[strlen(bufRead)] = 0;
-                if (res <= 0)
+				if (res <= 0)
 				{
 					string message = ":irc.serv client " + to_string(index) + " just left!\n";
+					cout << "res < 0\n";
 					for (int i = 0; i < 1024; i++)
 						send(i, message.c_str(), message.size(), 0);
-                    FD_CLR(index, &active);
+					FD_CLR(index, &active);
 					clients[index].id = -1;
 					clients[index].nickname = "";
 					clients[index].username = "";
-                    close(index);
-                    break ;
-                }
-                else
+					close(index);
+					break ;
+				}
+				else
 				{
+					string cmd;
+					cmd += bufRead;
+					while (bufRead[res - 1] != '\n')
+					{
+						cout << "IN\n";
+						res = recv(index, bufRead, 1024, 0);
+						cout << "res: " << res << endl;
+						cmd += bufRead;
+						//memset(bufRead, 0, 1024);
+						cout << "IN2\n";
+					}
+					cout << "OUT\n";
+					memset(bufRead, 0, 1024);
 					if (clients[index].id == index)
-						ft_commands(clients, index, bufRead, password);
+					{
+						const char *cmd2 = cmd.c_str();
+						ft_commands(clients, index, cmd2, password);
+					}
 					else
 						newClient(clients, index);
                     break;
-                }
+				}
+				//bufRead[strlen(bufRead)] = 0;
+                //if (res <= 0)
+				// {
+				// 	string message = ":irc.serv client " + to_string(index) + " just left!\n";
+				// 	for (int i = 0; i < 1024; i++)
+				// 		send(i, message.c_str(), message.size(), 0);
+                //     FD_CLR(index, &active);
+				// 	clients[index].id = -1;
+				// 	clients[index].nickname = "";
+				// 	clients[index].username = "";
+                //     close(index);
+                //     break ;
+                // }
+                // else
+				// {
+					// if (clients[index].id == index)
+					// {
+					// 	const char *cmd2 = cmd.c_str();
+					// 	ft_commands(clients, index, cmd2, password);
+					// }
+					// else
+					// 	newClient(clients, index);
+                    // break;
+            //    }
             }
         }
     }

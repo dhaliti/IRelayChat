@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:25:05 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 09:54:57 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/15 10:29:20 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -286,7 +286,7 @@ static void setUser(Client *clients, int &index, char **ident2, int &j)
 
 /***********************************COMMANDS***********************************/
 
-void ft_commands(Client *clients, int &index, char *bufRead, string &password)
+void ft_commands(Client *clients, int &index, const char *bufRead, string &password)
 {
 	int i = -1;
 	int j = -1;
