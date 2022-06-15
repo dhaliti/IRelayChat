@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:25:05 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/14 15:15:40 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/15 09:54:57 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,71 @@
 #include <sys/socket.h>
 
 
-static void channelPart(Client *clients, int &index, char **ident2, int &j)
+/******************************KICK FROM CHANNEL*******************************/
+
+static void channelKick(Client *clients, int &index, char **ident2, int &j)
 {
-	cout << "--part\n";
-	if (!ident2[j + 1])
+	if (!ident2[j + 1] || !ident2[j + 2]) //le channel et username du kické doivent etre precises;
 	{
 		string error = ":irc.serv 461 PART :Not enough parameters\n";
-		send(index, error.c_str(), error.size(), 0);
+		sendAll(index, error);
+	}
+	string user = string(ident2[j + 2]);
+	string channel = string(ident2[j + 1]);
+	int d;
+	if ((d = searchUser(clients, user)) == -1)
+	{
+		cout << "[Error] User " + user + " could not be found\n";
+		return;
+	}
+	for (size_t i = 0; i < clients[index].channels.size(); i++)
+	{
+		if (clients[index].channels[i] == channel) //Le kicker est dans le meme channel
+		{
+			if (clients[index].op == true)// le kicker a les droits operateur
+			{
+				for (vector<string>::iterator it = clients[d].channels.begin(); it != clients[d].channels.end(); it++) // cherche le channel parmi les channels du kické
+				{
+					if (*it == channel) //channel trouvé
+					{
+						clients[d].channels.erase(it); // efface le channel et envoie le message d'erreur;
+						string message = ":BOT!BOT@irc.server PRIVMSG " + channel + " :You have been kicked from the channel by " + clients[index].nickname + " with the following message -";
+						if (ident2[j + 3])
+						{
+							int k = 2;
+							while(ident2[++k + j])
+							{
+								if (ident2[k + j][0] == ':')
+									ident2[k + j][0] = ' ';
+								message += ident2[k + j];
+								message += " ";
+							}
+							message += "\n";
+						}
+						else
+						sendAll(d, message + " Your behavior is not conducive to the desired environment.\n");
+						return;
+					}
+				}
+			}
+			else //errur: pas de permissions operateur
+			{
+				sendAll(index, ":irc.serv 481 :Permission Denied- You're not an IRC operator.\n");
+				return;
+			}
+		}
+	}
+	// Erreur: le kicker n'est pas dans le channel;
+	sendAll(d,  string(":irc.serv 442 "  + string(ident2[j + 1]) + " :You're not on that channel\n"));
+}
+
+/******************************PART FROM CHANNEL*******************************/
+
+static void channelPart(Client *clients, int &index, char **ident2, int &j)
+{
+	if (!ident2[j + 1])
+	{
+		sendAll(index, ":irc.serv 461 PART :Not enough parameters\n");
 		return ;
 	}
 	string channel = string(ident2[j + 1]);
@@ -30,35 +88,42 @@ static void channelPart(Client *clients, int &index, char **ident2, int &j)
 		if (*it == channel)
 		{
 			clients[index].channels.erase(it);
-			string message = ":BOT!BOT@irc.server PRIVMSG " + clients[index].nickname + " :YOUR LEFT CHANNEL " + channel + endl;
-			send(index, message.c_str(), message.size(), 0);
+			string message = ":BOT!BOT@irc.server PRIVMSG " + channel + " :you left channel" + channel + "\n";
+			sendAll(index, message);
 			return;
 		}
 	}
 	string error = ":irc.serv 442 "  + channel + " :You're not on that channel\n";
+	sendAll(index, error);
 }
+
+/*********************************SET OPERATOR*********************************/
 
 static void setOper(Client *clients, int &index, char **ident2, int &j)
 {
 	if (!ident2[j + 1] || !ident2[j + 2])
 	{
-		string error = ":irc.serv 461 OPER :Not enough parameters\n";
-		send(index, error.c_str(), error.size(), 0);
+		sendAll(index, ":irc.serv 461 OPER :Not enough parameters\n");
 		return ;
 	}
-	if ((string(ident2[j + 1]) != "ADMIN") || (string(ident2[j + 2]) != "IRCSERV"))
+	if ((string(ident2[j + 1]) != "admin") || (string(ident2[j + 2]) != "admin"))
 	{
-		string error = ":irc.serv 464 :Password incorrect\n";
-		send(index, error.c_str(), error.size(), 0);
+		sendAll(index, ":irc.serv 464 :Password incorrect\n");
 		return ;
 	}
 	clients[index].op = true;
-	string message = ":irc.serv 381 :You are now an IRC operator\n";
-	send(index, message.c_str(), message.size(), 0);
+	sendAll(index, ":irc.serv 381 :You are now an IRC operator\n");
 }
+
+/*********************************JOIN CHANNEL*********************************/
 
 static void joinChannel(Client *clients, int &index, char **ident2, int &j)
 {
+	if (clients[index].connected == false)
+	{
+		sendAll(index, ":irc.serv 444 " + clients[index].username + ":User not logged in\n");
+		return;
+	}
 	if (!ident2[j + 1])
 		return ;
 	if (ident2[j + 1][0] != '#')
@@ -67,13 +132,13 @@ static void joinChannel(Client *clients, int &index, char **ident2, int &j)
 	{
 		if (clients[index].channels[i] == string(ident2[j + 1]))
 		{
-			string message = ":irc.server 443 " + clients[index].username + " " + string(ident2[j + 1]) + " :is already on channel\n";
-			send(index, message.c_str(), message.size(), 0);
+			string message = ":irc.server 443 " + string(":") + clients[index].username + " " + string(ident2[j + 1]) + " :is already on channel\n";
+			sendAll(index, message);
 			return;
 		}
 	}
 	clients[index].channels.push_back(ident2[j + 1]);
-	cout << "added: " << ident2[j + 1] << endl;
+	sendAll(index, ":BOT!BOT@irc.server PRIVMSG " + string(ident2[j + 1]) + " :You successfully joined channel" + string(ident2[j + 1]) + "\n");
 }
 
 
@@ -82,7 +147,7 @@ static void joinChannel(Client *clients, int &index, char **ident2, int &j)
 static void unknownCommand(int &index, string &cmd)
 {
 	string message = ":irc.serv 421 " + cmd + " :Unknown command\n";
-	send(index, message.c_str(), message.size(), 0);
+	sendAll(index, message);
 }
 
 /*******************************MESSAGE********************************/
@@ -119,7 +184,7 @@ static void channelMessage(Client *clients, int &index, char **ident2, int &j)
 			}
 		}
 		string error = ":irc.serv 442 " + channel + " :You're not on that channel\n";
-		send(index, error.c_str(), error.size(), 0);
+		sendAll(index, error);
 	}
 }
 
@@ -130,7 +195,7 @@ static void personnalMessage(Client *clients, int &index, char **ident2, int &j)
 	if (d == -1)
 	{
 		string error = ":irc.serv 401 " + nick + " :No such user\n";
-		send(index, error.c_str(), error.size(), 0);
+		sendAll(index, error);
 	}
 	else
 	{
@@ -142,7 +207,7 @@ static void personnalMessage(Client *clients, int &index, char **ident2, int &j)
 			message += ident2[i + j];
 		}
 		message	+= "\n";
-		send(d, message.c_str(), message.size(), 0);
+		sendAll(d, message);
 	}
 }
 
@@ -163,10 +228,7 @@ static void privateMsg(Client *clients, int &index, char **ident2, int &j)
 			personnalMessage(clients, index, ident2, j);
 	}
 	else
-	{
-		string error = ":irc.serv 401   :No such nick\n";
-		send(index, error.c_str(), error.size(), 0);
-	}
+		sendAll(index, ":irc.serv 401  :No such nick\n");
 }
 
 /***********************************SETPASS************************************/
@@ -200,13 +262,13 @@ static void setNick(Client *clients, int &index, char **ident2, int &j)
 		else
 		{
 			string error = ":irc.serv 433 " + string(ident2[j + 1]) + " :Nickname is already in use\n";
-			send(index, error.c_str(), error.size(), 0);
+			sendAll(index, error);
 		}
 	}
 	else
 	{
 		string error = ":irc.serv 431 :No nickname given\n";
-		send(index, error.c_str(), error.size(), 0);
+		sendAll(index, error);
 	}
 }
 
@@ -230,7 +292,6 @@ void ft_commands(Client *clients, int &index, char *bufRead, string &password)
 	int j = -1;
 	cout << "Command\n";
 	cout << bufRead << endl;
-//	clients[s].id = s;
 	char **ident = ft_split2(bufRead, "\r\n");
 	 while(ident && ident[++i])
 	 {
@@ -255,10 +316,9 @@ void ft_commands(Client *clients, int &index, char *bufRead, string &password)
 				setOper(clients, index, ident2, j);
 			else if (cmd == "PART")
 				channelPart(clients, index, ident2, j);
-			// else if (word == "KICK")
-			else if (cmd == "CLIENTS")
-			 	ft_clients(clients);
-			// }
+			else if (cmd == "KICK")
+				channelKick(clients, index, ident2, j);
+				//NOTICE
 			else
 			{
 				if (isUpper(cmd))

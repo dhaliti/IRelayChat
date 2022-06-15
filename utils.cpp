@@ -6,12 +6,40 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/13 16:31:27 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/14 11:20:08 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/14 18:50:22 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 #include "IRC.hpp"
+
+void sendAll(int &dest, string message)
+{
+	size_t total = 0;
+	int bytesleft = message.length();
+	int b;
+
+	while (total < message.length())
+	{
+		b = send(dest, message.c_str() + total, bytesleft, 0);
+		if (b == -1)
+			break;
+		total += b;
+		bytesleft -= b;
+	}
+	if (b == -1)
+		cout << "Error: Data could not be sent" << endl;
+}
+
+int searchUser(Client *clients, string &user)
+{
+	for (int i = 1; i < 1024; i++)
+	{
+		if (clients[i].username == user || clients[i].nickname == user)
+			return (i);
+	}
+	return (-1);
+}
 
 bool isUpper(string &str)
 {
@@ -70,7 +98,6 @@ bool newNick(char *str, Client *clients)
 
 int searchNick(Client *clients, string &nick)
 {
-	cout << "searchNick\n";
 	for (int i = 1; i < 1024; i++)
 	{
 		if (clients[i].nickname == nick || clients[i].username == nick)

@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/13 15:22:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/14 11:18:38 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/15 10:10:06 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,10 +102,11 @@ int main(int ac, char **av)
 
             if (FD_ISSET(index, &readyRead) && index != serverSock)
 			{
-                int res = recv(index, bufRead, 42*4096, 0);
+                int res = recv(index, bufRead, strlen(bufRead), 0);
+				bufRead[strlen(bufRead)] = 0;
                 if (res <= 0)
 				{
-					string message = "IRCserver: client " + to_string(index) + " just left!\n";
+					string message = ":irc.serv client " + to_string(index) + " just left!\n";
 					for (int i = 0; i < 1024; i++)
 						send(i, message.c_str(), message.size(), 0);
                     FD_CLR(index, &active);
