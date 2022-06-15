@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/13 15:22:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 10:17:46 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/15 10:19:37 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,7 @@ int main(int ac, char **av)
 
             if (FD_ISSET(index, &readyRead) && index != serverSock)
 			{
-                int res = recv(index, bufRead, strlen(bufRead), 0);
+                int res = recv(index, bufRead, 1024, 0);
 				//bufRead[strlen(bufRead)] = 0;
                 if (res <= 0)
 				{
