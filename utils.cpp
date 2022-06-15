@@ -6,7 +6,7 @@
 /*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/13 16:31:27 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 12:02:36 by flcollar         ###   ########.fr       */
+/*   Updated: 2022/06/15 16:40:59 by flcollar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ void isConnected(Client &client, int &index)
 	}
 }
 
-void ft_clients(Client *clients)
+void ft_clients(Client *clients, int &, char **, int &)
 {
 	for (int i = 0; i < 10; i++)
 		cout << i << ": " << "ID: " << clients[i].id << endl << "username: " << clients[i].username << endl << "nickname: " << clients[i].nickname << endl;
