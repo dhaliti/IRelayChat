@@ -6,7 +6,11 @@
 /*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:28:25 by dhaliti           #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2022/06/15 16:41:16 by flcollar         ###   ########.fr       */
+=======
+/*   Updated: 2022/06/15 16:34:43 by dhaliti          ###   ########.fr       */
+>>>>>>> 1d13bc9cc39da895f4127b321018b609e7aed8de
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +18,9 @@
 
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <fstream>
+
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <stdlib.h>
@@ -21,9 +28,19 @@
 #include "Client.hpp"
 #include <signal.h>
 
+#define NICK 1;
+#define USER 2;
+#define PRIVMSG 3;
+#define PASS 4;
+#define JOIN 5;
+#define OPER 6;
+#define PART 7;
+#define KICK 8;
+#define PING 9;
+#define CLIENTS 10;
+
+
 using namespace std;
-
-
 
 char	**ft_split2(const char *str, const char *charset);
 void 	ft_commands(Client *clients, int &s, const char *bufRead, string &password);
@@ -41,3 +58,4 @@ void 	botWelcome(Client &clients, int &index);
 void 	botCommand(Client *clients, int &index, char **ident2, int &j);
 int 	searchUser(Client *clients, string &user);
 void	sendAll(int &dest, string message);
+int		getCmd(string &cmd);

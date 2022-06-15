@@ -3,15 +3,30 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/13 16:31:27 by dhaliti           #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2022/06/15 16:40:59 by flcollar         ###   ########.fr       */
+=======
+/*   Updated: 2022/06/15 16:03:19 by dhaliti          ###   ########.fr       */
+>>>>>>> 1d13bc9cc39da895f4127b321018b609e7aed8de
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 #include "IRC.hpp"
+
+int getCmd(string &cmd)
+{
+	string elems[] = {"NICK", "USER", "PRIVMSG", "PASS", "JOIN", "OPER", "PART", "KICK", "PING", "CLIENTS", "SENDFILE", "GETFILE"};
+	for (int i = 0; i < 10; i++)
+	{
+		if (cmd == elems[i])
+			return (i);
+	}
+	return (-1);
+}
 
 void sendAll(int &dest, string message)
 {
