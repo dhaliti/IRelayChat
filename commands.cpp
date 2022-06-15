@@ -3,67 +3,76 @@
 /*                                                        :::      ::::::::   */
 /*   commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
+/*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:25:05 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 17:40:25 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/15 17:53:02 by flcollar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 #include "IRC.hpp"
 #include <sys/socket.h>
+#include <map>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 //#include <direct.h>
 
-static vector<string> tab;
-static vector<string> dest;
+static vector<File> files;
 
-static void getFile(Client *clients)
+static void getFile(Client *clients, int &index, char **ident2, int &j)
 {
-	///getfile sender;
-	for (int i = 0; i < dest.size(); i++)
+	bool hasContent = false;
+	for (size_t i = 0; i < files.size(); i++)
 	{
-		if (client[index].nickname == receiver[i])
+		if (clients[index].nickname == files[i].getDest())
 		{
-			(void)clients;
+			hasContent = true;
 			mkdir(clients[index].nickname.c_str(), 0777);
-			int fd = open("./downloads/damir.png", O_WRONLY | O_CREAT, 0644);
+			string path("./" + clients[index].nickname + "/" + files[i].getName());
+			int fd = open(path.c_str(), O_WRONLY | O_CREAT, 0644);
 			if (!fd)
 			{
-				cout << "[Error] File could not be transfered\n";
+				sendAll(index, ":irc.serv 485 " + string(ident2[j]) + " :Failed to retrieve content\n");
 				return;
 			}
-			ofstream out("./downloads/damir.png");
-			out << tab[i];
+			ofstream out(path);
+			out << files[i].getContent();
+			files.erase(next(files.begin(), i--));
 			close(fd);
-			tab[i] = "";
 		}
 	}
+	if (!hasContent)
+		sendAll(index, ":irc.serv 484 " + string(ident2[j]) + " :You had no content to retrieve\n");
 }
 
-static void sendFile(char **ident2, int &j)
+/***********************************SENDFILE************************************/
+
+static void sendFile(Client *clients, int &index, char **ident2, int &j)
 {
 	cout << "sendfile\n";
 	if (!ident2[j + 1] || !ident2[j + 2])
+	{
+		sendAll(index, ":irc.serv 461 " + string(ident2[j]) + " :Not enough parameters\n");
 		return;
+	}
 	int fd = open(ident2[j + 1], O_RDONLY);
 	if (fd == -1)
 	{
-		cout << "fd not opened\n";
+		sendAll(index, ":irc.serv 486 " + string(ident2[j]) + " :Failed to send content\n");
 		return;
 	}
 	char buf;
 	string content;
 	while (read(fd, &buf, 1))
 		content += buf;
-	dest.push_back (ident[j + 2]);
-	tab.push_back(content);
+	string name = &ident2[j + 1][string(ident2[j + 1]).rfind('/') + 1];
+	files.push_back(File(name, content, clients[index].nickname, ident2[j + 2]));
 }
 
-static void pingPong(int &index, char **ident2, int &j)
+
+static void pingPong(Client*, int &index, char **ident2, int &j)
 {
 	string message = "PONG ";
 	if (ident2[j + 1] && !ident2[j + 2])
@@ -350,13 +359,6 @@ static void setUser(Client *clients, int &index, char **ident2, int &j)
 	}
 }
 
-/***********************************SENDFILE************************************/
-
-static void sendFile(Client *clients, int &index, char **ident2, int &j){
-
-	
-}
-
 /***********************************COMMANDS***********************************/
 
 typedef void (*cmd)(Client*, int&, char**, int &);
@@ -368,55 +370,35 @@ void ft_commands(Client *clients, int &index, const char *bufRead, string &passw
 	cmds["NICK"] = &setNick;
 	cmds["USER"] = &setUser;
 	cmds["OPER"] = &setOper;
+	cmds["PONG"] = &pingPong;
 	cmds["JOIN"] = &joinChannel;
 	cmds["PART"] = &channelPart;
 	cmds["KICK"] = &channelKick;
 	cmds["NOTICE"] = &privateMsg;
 	cmds["PRIVMSG"] = &privateMsg;
 	cmds["CLIENTS"] = &ft_clients;
+	cmds["SENDFILE"] = &sendFile;
+	cmds["GETFILES"] = &getFile;
 
 	/* RUN ACROSS READ BUFFER AND EXECUTE COMMANDS */
 	int i = -1;
 	int j = -1;
 	cout << "Command: " << bufRead << endl;
 	char **ident = ft_split2(bufRead, "\r\n");
-	 while(ident && ident[++i])
-	 {
-		 j = -1;
-		 char **ident2 = ft_split2(ident[i], "\t ");
-		 while(ident2 && ident2[++j])
-		 {
-			string cmd = string(ident2[j]);
-			if (cmd == "NICK")
-				setNick(clients, index, ident2, j);
-			else if (cmd == "USER")
-				setUser(clients, index, ident2, j);
-			else if (cmd == "PRIVMSG")
-				privateMsg(clients, index, ident2, j);
-			else if (cmd == "PASS")
+	while(ident && ident[++i])
+	{
+		j = -1;
+		char **ident2 = ft_split2(ident[i], "\t ");
+		while(ident2 && ident2[++j])
+		{
+			string value(ident2[j]);
+			map<string, cmd>::iterator it = cmds.find(string(ident2[j]));
+			if (it != cmds.end())
+				(*it->second)(clients, index, ident2, j);
+			else if (value == "PASS")
 				setPass(clients, index, ident2, j, password);
-			else if (cmd == "JOIN")
-				joinChannel(clients, index, ident2, j);
-			else if (cmd == "OPER")
-				setOper(clients, index, ident2, j);
-			else if (cmd == "PART")
-				channelPart(clients, index, ident2, j);
-			else if (cmd == "KICK")
-				channelKick(clients, index, ident2, j);
-			else if (cmd == "PING")
-				pingPong(index, ident2, j);
-			else if (cmd == "CLIENTS")
-				ft_clients(clients);
-			else if (cmd == "SENDFILE")
-				sendFile(ident2, j);
-			else if (cmd == "GETFILE")
-				getFile(clients);
-			else
-			{
-				if (isUpper(cmd))
-					unknownCommand(index, cmd);
-				break;
-			}
+			else if (isUpper(value))
+				unknownCommand(index, value);
 	 	}
 		free(ident2);
 		free(ident[i]);

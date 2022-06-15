@@ -6,11 +6,7 @@
 /*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:28:25 by dhaliti           #+#    #+#             */
-<<<<<<< HEAD
 /*   Updated: 2022/06/15 16:41:16 by flcollar         ###   ########.fr       */
-=======
-/*   Updated: 2022/06/15 16:34:43 by dhaliti          ###   ########.fr       */
->>>>>>> 1d13bc9cc39da895f4127b321018b609e7aed8de
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +22,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "Client.hpp"
+#include "Files.hpp"
 #include <signal.h>
 
 #define NICK 1;
