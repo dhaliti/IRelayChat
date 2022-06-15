@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/13 15:22:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 10:17:46 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/15 10:19:37 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include "Client.hpp"
 #include "IRC.hpp"
+#include <fcntl.h>
 using namespace std;
 
 int _max = 0;
@@ -72,10 +73,14 @@ int main(int ac, char **av)
     addr.sin_addr.s_addr = htonl(2130706433);
     addr.sin_port = htons(port);
 
+	fcntl(serverSock, F_SETFL, O_NONBLOCK);
+
     if ((bind(serverSock, (const struct sockaddr *)&addr, sizeof(addr))) < 0)
         fatal_error();
     if (listen(serverSock, 128) < 0)
         fatal_error();
+
+	std::string tempString = "";
 
     while (1)
 	{
@@ -102,7 +107,22 @@ int main(int ac, char **av)
 
             if (FD_ISSET(index, &readyRead) && index != serverSock)
 			{
-                int res = recv(index, bufRead, strlen(bufRead), 0);
+                int res = recv(index, bufRead, 1024, 0);
+				
+				while (res > 0 && res != 1024 && bufRead[res - 1] != 10){
+					
+					bufRead[res] = 10;
+					tempString += string(bufRead);
+					std::cout << "TempString is : " << tempString << std::endl;
+					res = recv(index, bufRead, 1024, 0);
+				} 
+
+				// std::cout << "The size of RES is : "<< res << std::endl;
+				// for (int i = 0; i < res; i++)
+				// {
+				// 	std::cout << (int)bufRead[i] << std::endl;
+				// }
+				
 				//bufRead[strlen(bufRead)] = 0;
                 if (res <= 0)
 				{
@@ -119,7 +139,15 @@ int main(int ac, char **av)
                 else
 				{
 					if (clients[index].id == index)
+					{
+						if (tempString.size() != 0)
+						{
+							tempString += bufRead;
+							strcpy(bufRead, tempString.c_str());
+							tempString = "";
+						}
 						ft_commands(clients, index, bufRead, password);
+					}
 					else
 						newClient(clients, index);
                     break;
