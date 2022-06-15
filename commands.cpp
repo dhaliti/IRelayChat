@@ -3,17 +3,76 @@
 /*                                                        :::      ::::::::   */
 /*   commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:25:05 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 12:03:17 by flcollar         ###   ########.fr       */
+/*   Updated: 2022/06/15 17:40:25 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 #include "IRC.hpp"
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+//#include <direct.h>
 
+static vector<string> tab;
+static vector<string> dest;
+
+static void getFile(Client *clients)
+{
+	///getfile sender;
+	for (int i = 0; i < dest.size(); i++)
+	{
+		if (client[index].nickname == receiver[i])
+		{
+			(void)clients;
+			mkdir(clients[index].nickname.c_str(), 0777);
+			int fd = open("./downloads/damir.png", O_WRONLY | O_CREAT, 0644);
+			if (!fd)
+			{
+				cout << "[Error] File could not be transfered\n";
+				return;
+			}
+			ofstream out("./downloads/damir.png");
+			out << tab[i];
+			close(fd);
+			tab[i] = "";
+		}
+	}
+}
+
+static void sendFile(char **ident2, int &j)
+{
+	cout << "sendfile\n";
+	if (!ident2[j + 1] || !ident2[j + 2])
+		return;
+	int fd = open(ident2[j + 1], O_RDONLY);
+	if (fd == -1)
+	{
+		cout << "fd not opened\n";
+		return;
+	}
+	char buf;
+	string content;
+	while (read(fd, &buf, 1))
+		content += buf;
+	dest.push_back (ident[j + 2]);
+	tab.push_back(content);
+}
+
+static void pingPong(int &index, char **ident2, int &j)
+{
+	string message = "PONG ";
+	if (ident2[j + 1] && !ident2[j + 2])
+		message += ident2[j + 1];
+	else if (ident2[j + 2])
+		message += ident2[j + 2];
+	message += "\r\n";
+	sendAll(index, message);
+}
 
 /******************************KICK FROM CHANNEL*******************************/
 
@@ -298,15 +357,13 @@ void ft_commands(Client *clients, int &index, const char *bufRead, string &passw
 		 char **ident2 = ft_split2(ident[i], "\t ");
 		 while(ident2 && ident2[++j])
 		 {
-			 string cmd = string(ident2[j]);
+			string cmd = string(ident2[j]);
 			if (cmd == "NICK")
 				setNick(clients, index, ident2, j);
 			else if (cmd == "USER")
 				setUser(clients, index, ident2, j);
 			else if (cmd == "PRIVMSG")
 				privateMsg(clients, index, ident2, j);
-			else if (cmd == "CLIENTS")
-				ft_clients(clients);
 			else if (cmd == "PASS")
 				setPass(clients, index, ident2, j, password);
 			else if (cmd == "JOIN")
@@ -317,11 +374,19 @@ void ft_commands(Client *clients, int &index, const char *bufRead, string &passw
 				channelPart(clients, index, ident2, j);
 			else if (cmd == "KICK")
 				channelKick(clients, index, ident2, j);
-				//NOTICE
+			else if (cmd == "PING")
+				pingPong(index, ident2, j);
+			else if (cmd == "CLIENTS")
+				ft_clients(clients);
+			else if (cmd == "SENDFILE")
+				sendFile(ident2, j);
+			else if (cmd == "GETFILE")
+				getFile(clients);
 			else
 			{
 				if (isUpper(cmd))
 					unknownCommand(index, cmd);
+				break;
 			}
 	 	}
 		free(ident2);
