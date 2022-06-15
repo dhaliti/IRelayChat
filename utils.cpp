@@ -6,12 +6,23 @@
 /*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/13 16:31:27 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 16:40:59 by flcollar         ###   ########.fr       */
+/*   Updated: 2022/06/15 17:48:35 by flcollar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 #include "IRC.hpp"
+
+int getCmd(string &cmd)
+{
+	string elems[] = {"NICK", "USER", "PRIVMSG", "PASS", "JOIN", "OPER", "PART", "KICK", "PING", "CLIENTS", "SENDFILE", "GETFILE"};
+	for (int i = 0; i < 10; i++)
+	{
+		if (cmd == elems[i])
+			return (i);
+	}
+	return (-1);
+}
 
 void sendAll(int &dest, string message)
 {

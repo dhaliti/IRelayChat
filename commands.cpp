@@ -6,7 +6,7 @@
 /*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:25:05 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 16:45:19 by flcollar         ###   ########.fr       */
+/*   Updated: 2022/06/15 17:53:02 by flcollar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,67 @@
 #include "IRC.hpp"
 #include <sys/socket.h>
 #include <map>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+//#include <direct.h>
+
+static vector<string> tab;
+static vector<string> dest;
+
+static void getFile(Client *clients, int &index, char**, int&)
+{
+	///getfile sender;
+	for (size_t i = 0; i < dest.size(); i++)
+	{
+		if (clients[index].nickname == dest[i])
+		{
+			(void)clients;
+			mkdir(clients[index].nickname.c_str(), 0777);
+			int fd = open("./downloads/damir.png", O_WRONLY | O_CREAT, 0644);
+			if (!fd)
+			{
+				cout << "[Error] File could not be transfered\n";
+				return;
+			}
+			ofstream out("./downloads/damir.png");
+			out << tab[i];
+			close(fd);
+			tab[i] = "";
+		}
+	}
+}
+
+static void sendFile(Client*, int&, char **ident2, int &j)
+{
+	cout << "sendfile\n";
+	if (!ident2[j + 1] || !ident2[j + 2])
+		return;
+	int fd = open(ident2[j + 1], O_RDONLY);
+	if (fd == -1)
+	{
+		cout << "fd not opened\n";
+		return;
+	}
+	char buf;
+	string content;
+	while (read(fd, &buf, 1))
+		content += buf;
+	dest.push_back (ident2[j + 2]);
+	tab.push_back(content);
+}
+
+
+static void pingPong(Client*, int &index, char **ident2, int &j)
+{
+	string message = "PONG ";
+	if (ident2[j + 1] && !ident2[j + 2])
+		message += ident2[j + 1];
+	else if (ident2[j + 2])
+		message += ident2[j + 2];
+	message += "\r\n";
+	sendAll(index, message);
+}
 
 /******************************KICK FROM CHANNEL*******************************/
 
@@ -302,12 +363,15 @@ void ft_commands(Client *clients, int &index, const char *bufRead, string &passw
 	cmds["NICK"] = &setNick;
 	cmds["USER"] = &setUser;
 	cmds["OPER"] = &setOper;
+	cmds["PONG"] = &pingPong;
 	cmds["JOIN"] = &joinChannel;
 	cmds["PART"] = &channelPart;
 	cmds["KICK"] = &channelKick;
 	cmds["NOTICE"] = &privateMsg;
 	cmds["PRIVMSG"] = &privateMsg;
 	cmds["CLIENTS"] = &ft_clients;
+	cmds["SENDFILE"] = &sendFile;
+	cmds["GETFILES"] = &getFile;
 
 	/* RUN ACROSS READ BUFFER AND EXECUTE COMMANDS */
 	int i = -1;
