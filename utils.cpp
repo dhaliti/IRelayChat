@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
+/*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/13 16:31:27 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/14 18:50:22 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/15 12:02:36 by flcollar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ int searchUser(Client *clients, string &user)
 
 bool isUpper(string &str)
 {
-	for (int i = 0; i < str.size(); i++)
+	for (size_t i = 0; i < str.size(); i++)
 	{
 		if (isupper(str[i] != 0))
 			return true;

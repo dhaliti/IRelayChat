@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Commands.cpp                                       :+:      :+:    :+:   */
+/*   commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
+/*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:25:05 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 09:54:57 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/15 12:03:17 by flcollar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -214,7 +214,6 @@ static void personnalMessage(Client *clients, int &index, char **ident2, int &j)
 static void privateMsg(Client *clients, int &index, char **ident2, int &j)
 {
 	cout << "privateMessage\n";
-	int d;
 	if (ident2[j + 1] && ident2[j + 2])
 	{
 		if (string(ident2[j + 1]) == "BOT")
@@ -284,9 +283,16 @@ static void setUser(Client *clients, int &index, char **ident2, int &j)
 	}
 }
 
+/***********************************SENDFILE************************************/
+
+static void sendFile(Client *clients, int &index, char **ident2, int &j){
+
+	
+}
+
 /***********************************COMMANDS***********************************/
 
-void ft_commands(Client *clients, int &index, char *bufRead, string &password)
+void ft_commands(Client *clients, int &index, const char *bufRead, string &password)
 {
 	int i = -1;
 	int j = -1;
@@ -318,6 +324,10 @@ void ft_commands(Client *clients, int &index, char *bufRead, string &password)
 				channelPart(clients, index, ident2, j);
 			else if (cmd == "KICK")
 				channelKick(clients, index, ident2, j);
+			else if (cmd == "SENDFILE")
+				//SENDFILE IMPLEMENTATION
+			else if (cmd == "GETFILE")
+				//GETFILE IMPLEMENTATION
 				//NOTICE
 			else
 			{

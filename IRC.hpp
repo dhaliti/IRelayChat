@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:28:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 09:54:45 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/15 10:29:04 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ using namespace std;
 
 
 char	**ft_split2(const char *str, const char *charset);
-void 	ft_commands(Client *clients, int &s, char *bufRead, string &password);
+void 	ft_commands(Client *clients, int &s, const char *bufRead, string &password);
 void 	newClient(Client *clients, int &s, char *bufRead);
 
 /*utils.cpp*/
