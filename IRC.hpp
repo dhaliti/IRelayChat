@@ -6,7 +6,7 @@
 /*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:28:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 12:51:42 by flcollar         ###   ########.fr       */
+/*   Updated: 2022/06/15 16:41:16 by flcollar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ void 	newClient(Client *clients, int &s, char *bufRead);
 /*utils.cpp*/
 bool 	isUpper(string &str);
 void 	isConnected(Client &client, int &index);
-void 	ft_clients(Client *clients);
+void 	ft_clients(Client *clients, int&, char **, int&);
 bool 	notEmpty(char *str, int index);
 bool 	newNick(char *str, Client *clients);
 int 	searchNick(Client *clients, string &nick);

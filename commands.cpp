@@ -6,14 +6,14 @@
 /*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:25:05 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 15:54:23 by flcollar         ###   ########.fr       */
+/*   Updated: 2022/06/15 16:45:19 by flcollar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 #include "IRC.hpp"
 #include <sys/socket.h>
-
+#include <map>
 
 /******************************KICK FROM CHANNEL*******************************/
 
@@ -293,45 +293,41 @@ static void setUser(Client *clients, int &index, char **ident2, int &j)
 
 /***********************************COMMANDS***********************************/
 
+typedef void (*cmd)(Client*, int&, char**, int &);
 void ft_commands(Client *clients, int &index, const char *bufRead, string &password)
 {
+	/* LIST OF COMMANDS WITH THEIR ASSOCIATED FUNCTIONS */
+	map<string, cmd> cmds;
+
+	cmds["NICK"] = &setNick;
+	cmds["USER"] = &setUser;
+	cmds["OPER"] = &setOper;
+	cmds["JOIN"] = &joinChannel;
+	cmds["PART"] = &channelPart;
+	cmds["KICK"] = &channelKick;
+	cmds["NOTICE"] = &privateMsg;
+	cmds["PRIVMSG"] = &privateMsg;
+	cmds["CLIENTS"] = &ft_clients;
+
+	/* RUN ACROSS READ BUFFER AND EXECUTE COMMANDS */
 	int i = -1;
 	int j = -1;
-	cout << "Command\n";
-	cout << bufRead << endl;
+	cout << "Command: " << bufRead << endl;
 	char **ident = ft_split2(bufRead, "\r\n");
-	 while(ident && ident[++i])
-	 {
-		 j = -1;
-		 char **ident2 = ft_split2(ident[i], "\t ");
-		 while(ident2 && ident2[++j])
-		 {
-			string cmd(ident2[j]);
-			if (cmd == "NICK")
-				setNick(clients, index, ident2, j);
-			else if (cmd == "USER")
-				setUser(clients, index, ident2, j);
-			else if (cmd == "PRIVMSG")
-				privateMsg(clients, index, ident2, j);
-			else if (cmd == "CLIENTS")
-				ft_clients(clients);
-			else if (cmd == "PASS")
+	while(ident && ident[++i])
+	{
+		j = -1;
+		char **ident2 = ft_split2(ident[i], "\t ");
+		while(ident2 && ident2[++j])
+		{
+			string value(ident2[j]);
+			map<string, cmd>::iterator it = cmds.find(string(ident2[j]));
+			if (it != cmds.end())
+				(*it->second)(clients, index, ident2, j);
+			else if (value == "PASS")
 				setPass(clients, index, ident2, j, password);
-			else if (cmd == "JOIN")
-				joinChannel(clients, index, ident2, j);
-			else if (cmd == "OPER")
-				setOper(clients, index, ident2, j);
-			else if (cmd == "PART")
-				channelPart(clients, index, ident2, j);
-			else if (cmd == "KICK")
-				channelKick(clients, index, ident2, j);
-			else if (cmd == "NOTICE")
-				privateMsg(clients, index, ident2, j);
-			else
-			{
-				if (isUpper(cmd))
-					unknownCommand(index, cmd);
-			}
+			else if (isUpper(value))
+				unknownCommand(index, value);
 	 	}
 		free(ident2);
 		free(ident[i]);
