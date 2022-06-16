@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/13 15:22:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 14:14:11 by flcollar         ###   ########.fr       */
+/*   Updated: 2022/06/16 11:04:29 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,16 +21,7 @@
 #include <fcntl.h>
 using namespace std;
 
-int _max = 0;
-int next_id = 0;
-
 fd_set active;
-fd_set readyRead;
-fd_set readyWrite;
-
-char bufRead[1024];
-char bufWrite[1024];
-Client clients[1024];
 
 void force_quit(int)
 {
@@ -42,126 +33,67 @@ void force_quit(int)
 	exit (0);
 }
 
-void fatal_error()
+static void Socketting(int &serverSock, int &_max)
 {
-    cerr << "Fatal error\n";
-    exit (1);
+	serverSock = socket(AF_INET, SOCK_STREAM, 0);
+	if (serverSock < 0)
+		throw out_of_range("Socket failed");
+	if (fcntl(serverSock, F_SETFL, O_NONBLOCK) == -1)
+		throw out_of_range("Non-blocking Socket failed");
+	_max = serverSock;
+	FD_SET(serverSock, &active);
 }
 
-void send_all(int es)
+static void Binding(int &serverSock, sockaddr_in &addr, int &port)
 {
-    for (int i = 0; i <= _max; i++)
-        if (FD_ISSET(i, &readyWrite) && i != es)
-            send(i, bufWrite, strlen(bufWrite), 0);
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = htonl(2130706433);
+	addr.sin_port = htons(port);
+	fcntl(serverSock, F_SETFL, O_NONBLOCK);
+	if ((bind(serverSock, (const struct sockaddr *)&addr, sizeof(addr))) < 0)
+	   throw out_of_range("Binding failed");
+	if (listen(serverSock, 128) < 0)
+	   throw out_of_range("Listening failed");
 }
 
-static void checkArgs(int &ac, char **av, int &port, string &password)
+static void checkArgs(Client *clients, fd_set &active, int &ac, char **av, int &port, string &password)
 {
 	if (ac != 3)
-	{
-        cerr << "Wrong number of arguments\n" << "Usage: ./ircserv port password\n";
-		exit(1);
-	}
+        throw invalid_argument("Wrong number of arguments\nUsage: ./ircserv port password");
 	port = atoi(av[1]);
 	password = string(av[2]);
 	if (port <= 0)
-	{
-		cerr << "Port cannot be negative !\n";
-		exit(1);
-	}
+		throw out_of_range("Port cannot be negative !");
+	bzero(&clients, sizeof(clients));
+	FD_ZERO(&active);
 }
 
 int main(int ac, char **av)
 {
+	int _max = 0;
+	int next_id = 0;
+	fd_set readyRead;
+	fd_set readyWrite;
+	char bufRead[1024];
+	Client clients[1024];
 	int port;
 	string password;
+	int serverSock;
+	struct sockaddr_in addr;
+	socklen_t addr_len = sizeof(addr);
 
-	checkArgs(ac, av, port, password);
-    bzero(&clients, sizeof(clients));
-    FD_ZERO(&active);
-
-    int serverSock = socket(AF_INET, SOCK_STREAM, 0);
-    if (serverSock < 0)
-        fatal_error();
-	if (fcntl(serverSock, F_SETFL, O_NONBLOCK) == -1)
-		fatal_error();
-
-    _max = serverSock;
-    FD_SET(serverSock, &active);
-
-    struct sockaddr_in addr;
-    socklen_t addr_len = sizeof(addr);
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = htonl(2130706433);
-    addr.sin_port = htons(port);
-
-	fcntl(serverSock, F_SETFL, O_NONBLOCK);
-
-    if ((bind(serverSock, (const struct sockaddr *)&addr, sizeof(addr))) < 0)
-        fatal_error();
-    if (listen(serverSock, 128) < 0)
-        fatal_error();
-
-	signal(SIGINT, force_quit);
-    while (1)
+	try
 	{
-        readyRead = readyWrite = active;
-        if (select(_max + 1, &readyRead, &readyWrite, NULL, NULL) < 0)
-            continue ;
+		checkArgs(clients, active, ac, av, port, password);
+		Socketting(serverSock, _max);
+		Binding(serverSock, addr, port);
+		signal(SIGINT, force_quit);
+		IRCLoop(clients, readyRead, readyWrite, active, _max, serverSock, next_id, bufRead, password, addr_len, addr);
+	}
 
-        for (int index = 0; index <= _max; index++)
-		{
-            if (FD_ISSET(index, &readyRead) && index == serverSock)
-			{
-                int clientSock = accept(serverSock, (struct sockaddr *)&addr, &addr_len);
-                if (clientSock < 0)
-                    continue ;
-                _max = (clientSock > _max) ? clientSock : _max;
-
-                clients[clientSock].id = next_id++;
-
-                FD_SET(clientSock, &active);
-                cout << "Client #" << clients[clientSock].id << " just arrived";
-                //break ;
-            }
-
-            if (FD_ISSET(index, &readyRead) && index != serverSock)
-			{
-				int res;
-				string cmd;
-				memset(bufRead, '\0', 1024);
-				res = recv(index, bufRead, 1024, 0);
-				cmd += bufRead;
-				if (res <= 0)
-				{
-					string message = ":irc.serv client " + to_string(index) + " just left!\n";
-					for (int i = 0; i < 1024; i++)
-						send(i, message.c_str(), message.size(), 0);
-					FD_CLR(index, &active);
-					clients[index].id = -1;
-					clients[index].nickname = "";
-					clients[index].username = "";
-					close(index);
-					break ;
-				}
-				else
-				{
-					while (!strstr(bufRead, "\n"))
-					{
-						memset(bufRead, '\0', 1024);
-						res = recv(index, bufRead, 1024, 0);
-						cmd += bufRead;
-					}
-				}
-					if (clients[index].id == index)
-					{
-						const char *cmd2 = cmd.c_str();
-						ft_commands(clients, index, cmd2, password);
-					}
-					else
-						newClient(clients, index);
-                    break;
-            }
-        }
-    }
+	catch(exception &e)
+	{
+		cout << e.what() << endl;
+		exit(1);
+	}
 }
