@@ -24,6 +24,7 @@
 #include "Client.hpp"
 #include "Files.hpp"
 #include <signal.h>
+#include <map>
 
 #define NICK 1;
 #define USER 2;

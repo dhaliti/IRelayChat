@@ -95,8 +95,6 @@ int main(int ac, char **av)
     addr.sin_addr.s_addr = htonl(2130706433);
     addr.sin_port = htons(port);
 
-	fcntl(serverSock, F_SETFL, O_NONBLOCK);
-
     if ((bind(serverSock, (const struct sockaddr *)&addr, sizeof(addr))) < 0)
         fatal_error();
     if (listen(serverSock, 128) < 0)
