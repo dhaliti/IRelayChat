@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/13 15:22:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/16 18:22:14 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/16 18:41:40 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,10 +51,10 @@ static void checkArgs(Client *clients, fd_set &active, int &ac, char **av, int &
 {
 	if (ac != 3)
         throw invalid_argument("Wrong number of arguments\nUsage: ./ircserv port password");
-	port = atoi(av[1]);
 	password = string(av[2]);
-	if (port <= 0)
-		throw out_of_range("Port cannot be negative !");
+	port = atoi(av[1]);
+	if (port <= 0 || port > 65535)
+		throw out_of_range("Port out of range!");
 	bzero(&clients, sizeof(clients));
 	FD_ZERO(&active);
 }
