@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: cciobanu <cciobanu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/13 16:31:27 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 16:40:59 by flcollar         ###   ########.fr       */
+/*   Updated: 2022/06/16 15:32:48 by cciobanu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int searchUser(Client *clients, string &user)
 {
 	for (int i = 1; i < 1024; i++)
 	{
-		if (clients[i].username == user || clients[i].nickname == user)
+		if (clients[i].getUserName() == user || clients[i].getNickName() == user)
 			return (i);
 	}
 	return (-1);
@@ -64,10 +64,10 @@ bool isUpper(string &str)
 
 void isConnected(Client &client, int &index)
 {
-	if (client.username != "" && client.nickname != "" && client.password == true && client.connected == false)
+	if (client.getUserName() != "" && client.getNickName() != "" && client.password == true && client.isConnected() == false)
 	{
-		client.connected = true;
-		string message = ":irc.serv 001 " + client.nickname + " :Welcome to the Internet Relay Network " + client.nickname + "!" + client.username +"@irc.serv\n";
+		client.setConnected(true);
+		string message = ":irc.serv 001 " + client.getNickName() + " :Welcome to the Internet Relay Network " + client.getNickName() + "!" + client.getUserName() +"@irc.serv\n";
 		send(index, message.c_str(), message.size(), 0);
 		botWelcome(client, index);
 	}
@@ -76,7 +76,7 @@ void isConnected(Client &client, int &index)
 void ft_clients(Client *clients, int &, char **, int &)
 {
 	for (int i = 0; i < 10; i++)
-		cout << i << ": " << "ID: " << clients[i].id << endl << "username: " << clients[i].username << endl << "nickname: " << clients[i].nickname << endl;
+		cout << i << ": " << "ID: " << clients[i].getId() << endl << "username: " << clients[i].getUserName() << endl << "nickname: " << clients[i].getNickName() << endl;
 }
 
 bool notEmpty(char *str, int index)
@@ -101,7 +101,7 @@ bool newNick(char *str, Client *clients)
 	string nick = string(str);
 	for (int i = 0; i < 1024; i++)
 	{
-		if (clients[i].nickname == nick)
+		if (clients[i].getNickName() == nick)
 			return false;
 	}
 	return true;
@@ -111,7 +111,7 @@ int searchNick(Client *clients, string &nick)
 {
 	for (int i = 1; i < 1024; i++)
 	{
-		if (clients[i].nickname == nick || clients[i].username == nick)
+		if (clients[i].getNickName() == nick || clients[i].getUserName() == nick)
 			return (i);
 	}
 	return (-1);

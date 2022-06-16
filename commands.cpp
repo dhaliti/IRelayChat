@@ -6,7 +6,7 @@
 /*   By: cciobanu <cciobanu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:25:05 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/16 14:44:49 by cciobanu         ###   ########.fr       */
+/*   Updated: 2022/06/16 15:58:40 by cciobanu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,11 +26,11 @@ static void getFile(Client *clients, int &index, char **ident2, int &j)
 	bool hasContent = false;
 	for (size_t i = 0; i < files.size(); i++)
 	{
-		if (clients[index].nickname == files[i].getDest())
+		if (clients[index].getNickName() == files[i].getDest())
 		{
 			hasContent = true;
-			mkdir(clients[index].nickname.c_str(), 0777);
-			string path("./" + clients[index].nickname + "/" + files[i].getName());
+			mkdir(clients[index].getNickName().c_str(), 0777);
+			string path("./" + clients[index].getNickName() + "/" + files[i].getName());
 			int fd = open(path.c_str(), O_WRONLY | O_CREAT, 0644);
 			if (!fd)
 			{
@@ -68,7 +68,7 @@ static void sendFile(Client *clients, int &index, char **ident2, int &j)
 	while (read(fd, &buf, 1))
 		content += buf;
 	string name = &ident2[j + 1][string(ident2[j + 1]).rfind('/') + 1];
-	files.push_back(File(name, content, clients[index].nickname, ident2[j + 2]));
+	files.push_back(File(name, content, clients[index].getNickName(), ident2[j + 2]));
 }
 
 
@@ -105,14 +105,14 @@ static void channelKick(Client *clients, int &index, char **ident2, int &j)
 	{
 		if (clients[index].channels[i] == channel) //Le kicker est dans le meme channel
 		{
-			if (clients[index].op == true)// le kicker a les droits operateur
+			if (clients[index].isOp() == true)// le kicker a les droits operateur
 			{
 				for (vector<string>::iterator it = clients[d].channels.begin(); it != clients[d].channels.end(); it++) // cherche le channel parmi les channels du kické
 				{
 					if (*it == channel) //channel trouvé
 					{
 						clients[d].channels.erase(it); // efface le channel et envoie le message d'erreur;
-						string message = ":BOT!BOT@irc.server PRIVMSG " + channel + " :You have been kicked from the channel by " + clients[index].nickname + " with the following message -";
+						string message = ":BOT!BOT@irc.server PRIVMSG " + channel + " :You have been kicked from the channel by " + clients[index].getNickName() + " with the following message -";
 						if (ident2[j + 3])
 						{
 							int k = 2;
@@ -180,7 +180,7 @@ static void setOper(Client *clients, int &index, char **ident2, int &j)
 		sendAll(index, ":irc.serv 464 :Password incorrect\n");
 		return ;
 	}
-	clients[index].op = true;
+	clients[index].setOp(true);
 	sendAll(index, ":irc.serv 381 :You are now an IRC operator\n");
 }
 
@@ -188,9 +188,9 @@ static void setOper(Client *clients, int &index, char **ident2, int &j)
 
 static void joinChannel(Client *clients, int &index, char **ident2, int &j)
 {
-	if (clients[index].connected == false)
+	if (clients[index].isConnected() == false)
 	{
-		sendAll(index, ":irc.serv 444 " + clients[index].username + ":User not logged in\n");
+		sendAll(index, ":irc.serv 444 " + clients[index].getUserName() + ":User not logged in\n");
 		return;
 	}
 	if (!ident2[j + 1])
@@ -207,7 +207,7 @@ static void joinChannel(Client *clients, int &index, char **ident2, int &j)
 	{
 		if (clients[index].channels[i] == string(ident2[j + 1]))
 		{
-			string message = ":irc.server 443 " + string(":") + clients[index].username + " " + string(ident2[j + 1]) + " :is already on channel\n";
+			string message = ":irc.server 443 " + string(":") + clients[index].getUserName() + " " + string(ident2[j + 1]) + " :is already on channel\n";
 			sendAll(index, message);
 			return;
 		}
@@ -239,7 +239,7 @@ static void channelMessage(Client *clients, int &index, char **ident2, int &j)
 		{
 			if (clients[index].channels[i] == channel)
 			{
-				string message = ":" + clients[index].nickname + "!" + clients[index].username + "@irc.server" + " PRIVMSG " + channel;
+				string message = ":" + clients[index].getNickName() + "!" + clients[index].getUserName() + "@irc.server" + " PRIVMSG " + channel;
 				int k = 1;
 				while (ident2[++k + j])
 				{
@@ -274,7 +274,7 @@ static void personnalMessage(Client *clients, int &index, char **ident2, int &j)
 	}
 	else
 	{
-		string message = ":" + clients[index].nickname + "!" + clients[index].username + "@irc.server" + " PRIVMSG " + nick;
+		string message = ":" + clients[index].getNickName() + "!" + clients[index].getUserName() + "@irc.server" + " PRIVMSG " + nick;
 		int i = 1;
 		while (ident2[++i + j])
 		{
@@ -329,7 +329,7 @@ static void setNick(Client *clients, int &index, char **ident2, int &j)
 		if (newNick(ident2[j + 1], clients))
 		{
 			string nick = string(ident2[j + 1]);
-			clients[index].nickname = nick;
+			clients[index].setNickName(nick);
 			isConnected(clients[index], index);
 		}
 		else
@@ -349,12 +349,12 @@ static void setNick(Client *clients, int &index, char **ident2, int &j)
 
 static void setUser(Client *clients, int &index, char **ident2, int &j)
 {
-	if (!clients[index].username.empty())
+	if (!clients[index].getUserName().empty())
 		sendAll(index, ":irc.serv 462 :You may not reregister\n");
 	else if (ident2[j + 1] && notEmpty(ident2[j + 1], 1))
 	{
 		string user = string(ident2[j + 1]);
-		clients[index].username = user;
+		clients[index].setUserName(user);
 		isConnected(clients[index], index);
 	}
 }
@@ -406,7 +406,7 @@ void ft_commands(Client *clients, int &index, const char *bufRead, string &passw
 }
 
 void botCommand(Client *clients, int &index, char **ident2, int &j){
-	Bot bot = Bot(clients[index].nickname);
+	Bot bot = Bot(clients[index].getNickName());
 	map<string, string> command = bot.getCommands();
 	map<string, string>::iterator it;
 
@@ -415,6 +415,6 @@ void botCommand(Client *clients, int &index, char **ident2, int &j){
 	if (it != command.end())
 		message = it -> second;
 	else
-		message = ":BOT!BOT@irc.server PRIVMSG " + clients[index].nickname + string(ident2[j +2])+ " -- Unknown command.\n";		
+		message = ":BOT!BOT@irc.server PRIVMSG " + clients[index].getNickName() + string(ident2[j +2])+ " -- Unknown command.\n";		
 	sendAll(index, message);
 }

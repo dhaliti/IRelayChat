@@ -10,7 +10,7 @@ ARGS = 8888 pp
 FLAGS = -Wall -Werror -Wextra -std=c++98 -g3
 DANGER = -fsanitize=address
 
-SRC = Bot.cpp newClient.cpp utils.cpp commands.cpp main.cpp Files.cpp Loop.cpp
+SRC = Bot.cpp newClient.cpp utils.cpp commands.cpp main.cpp Files.cpp Loop.cpp Client.cpp
 OBJ = $(SRC:.cpp=.o)
 
 # ==---------------------== #

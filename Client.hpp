@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
+/*   By: cciobanu <cciobanu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 13:39:09 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/16 11:57:32 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/16 16:03:35 by cciobanu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,40 +21,33 @@ using namespace std;
 class Client
 {
 	public:
-		Client()
-		{
-			id = 0;
-			op = false;
-			nickname = "";
-			msg = "";
-			username = "";
-			connected = false;
-			password = false;
-		};
+		Client();
 
-		~Client() {};
+		~Client();
 
-		Client(const Client &other) 		{*this = other;};
+		Client(const Client &other);
 
-		Client & operator=(const Client &other)
-		{
-			this->id = other.id;
-			this->op = other.op;
-			this->nickname = other.nickname;
-			this->msg = other.msg;
-			this->username = other.username;
-			this->channels = other.channels;
-			return *this;
-		};
+		Client & operator=(const Client &other);
 
+		bool			password;
+		vector<string>	channels;
+
+		int				getId(void) const;
+		void			setId(int id);
+		bool			isOp(void) const;
+		void			setOp(bool isOp);
+		bool			isConnected(void) const;
+		void			setConnected(bool conn);
+		string			getNickName(void) const;
+		void			setNickName(string name);
+		string			getUserName(void) const;
+		void			setUserName(string name);
+
+	private:
 		int				id;
 		bool			op;
 		string			nickname;
-		string 			msg;
 		string			username;
-		vector<string>	channels;
 		bool 			connected;
-		bool			password;
 
-	private:
 };

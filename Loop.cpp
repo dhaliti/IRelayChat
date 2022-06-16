@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Loop.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
+/*   By: cciobanu <cciobanu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/16 10:36:00 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/16 11:58:54 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/16 16:01:41 by cciobanu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,11 +44,11 @@ void IRCLoop(Client *clients, fd_set &readyRead, fd_set &readyWrite, fd_set &act
 				cmd += bufRead;
 				if (res <= 0)
 				{
-					cout << "Client #" << clients[index].id - 4 << " just left!\n";
+					cout << "Client #" << clients[index].getId() - 4 << " just left!\n";
 					FD_CLR(index, &active);
-					clients[index].id = -1;
-					clients[index].nickname = "";
-					clients[index].username = "";
+					clients[index].setId(-1);
+					clients[index].setNickName("");
+					clients[index].setUserName("");
 					close(index);
 					break ;
 				}
@@ -61,7 +61,7 @@ void IRCLoop(Client *clients, fd_set &readyRead, fd_set &readyWrite, fd_set &act
 						cmd += bufRead;
 					}
 				}
-					if (clients[index].id == index)
+					if (clients[index].getId() == index)
 					{
 						const char *cmd2 = cmd.c_str();
 						ft_commands(clients, index, cmd2, password);
