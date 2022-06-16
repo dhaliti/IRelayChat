@@ -1,34 +1,37 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   commands.cpp                                       :+:      :+:    :+:   */
+/*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cciobanu <cciobanu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:25:05 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/16 15:58:40 by cciobanu         ###   ########.fr       */
+/*   Updated: 2022/06/16 18:22:00 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Client.hpp"
 #include "IRC.hpp"
-#include <sys/socket.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-//#include <direct.h>
 
 static vector<File> files;
 
+static void quit(Client *clients, int &index, fd_set & active)
+{
+	cout << RED << "Client #" << clients[index].getId() - 4 << " just left!\n" << END;
+	clients[index].setUserName("");
+	clients[index].setNickName("");
+	clients[index].setId(-1);
+	FD_CLR(index, &active);
+	close(index);
+}
+
 static void getFile(Client *clients, int &index, char **ident2, int &j)
 {
-	bool hasContent = false;
+	int hasContent = 0;
 	for (size_t i = 0; i < files.size(); i++)
 	{
 		if (clients[index].getNickName() == files[i].getDest())
 		{
-			hasContent = true;
+			hasContent++;
 			mkdir(clients[index].getNickName().c_str(), 0777);
 			string path("./" + clients[index].getNickName() + "/" + files[i].getName());
 			int fd = open(path.c_str(), O_WRONLY | O_CREAT, 0644);
@@ -45,22 +48,30 @@ static void getFile(Client *clients, int &index, char **ident2, int &j)
 	}
 	if (!hasContent)
 		sendAll(index, ":irc.serv 484 " + string(ident2[j]) + " :You had no content to retrieve\n");
+	else
+		sendAll(index, ":BOT!BOT@irc.server PRIVMSG " + clients[index].getNickName() + " :You successfully retrieved your files\n");
 }
 
 /***********************************SENDFILE************************************/
 
 static void sendFile(Client *clients, int &index, char **ident2, int &j)
 {
-	cout << "sendfile\n";
 	if (!ident2[j + 1] || !ident2[j + 2])
 	{
 		sendAll(index, ":irc.serv 461 " + string(ident2[j]) + " :Not enough parameters\n");
 		return;
 	}
+	string target(ident2[j + 2]);
+	int d = searchNick(clients, target);
+	if (d == -1)
+	{
+		sendAll(index, ":irc.serv 401 " + target + " :No such user\n");
+		return ;
+	}
 	int fd = open(ident2[j + 1], O_RDONLY);
 	if (fd == -1)
 	{
-		sendAll(index, ":irc.serv 486 " + string(ident2[j]) + " :Failed to send content\n");
+		sendAll(index, ":irc.serv 486 " + target + " :Failed to send content\n");
 		return;
 	}
 	char buf;
@@ -69,6 +80,7 @@ static void sendFile(Client *clients, int &index, char **ident2, int &j)
 		content += buf;
 	string name = &ident2[j + 1][string(ident2[j + 1]).rfind('/') + 1];
 	files.push_back(File(name, content, clients[index].getNickName(), ident2[j + 2]));
+	sendAll(d, ":BOT!BOT@irc.server PRIVMSG " + target + " :" + clients[index].getNickName() + " has sent you a file " + name + "\n");
 }
 
 
@@ -87,7 +99,7 @@ static void pingPong(Client*, int &index, char **ident2, int &j)
 
 static void channelKick(Client *clients, int &index, char **ident2, int &j)
 {
-	if (!ident2[j + 1] || !ident2[j + 2]) //le channel et username du kické doivent etre precises;
+	if (!ident2[j + 1] || !ident2[j + 2])
 	{
 		string error = ":irc.serv 461 " + string(ident2[j]) + " :Not enough parameters\n";
 		sendAll(index, error);
@@ -103,15 +115,15 @@ static void channelKick(Client *clients, int &index, char **ident2, int &j)
 	}
 	for (size_t i = 0; i < clients[index].channels.size(); i++)
 	{
-		if (clients[index].channels[i] == channel) //Le kicker est dans le meme channel
+		if (clients[index].channels[i] == channel)
 		{
-			if (clients[index].isOp() == true)// le kicker a les droits operateur
+			if (clients[index].isOp() == true)
 			{
-				for (vector<string>::iterator it = clients[d].channels.begin(); it != clients[d].channels.end(); it++) // cherche le channel parmi les channels du kické
+				for (vector<string>::iterator it = clients[d].channels.begin(); it != clients[d].channels.end(); it++)
 				{
-					if (*it == channel) //channel trouvé
+					if (*it == channel)
 					{
-						clients[d].channels.erase(it); // efface le channel et envoie le message d'erreur;
+						clients[d].channels.erase(it);
 						string message = ":BOT!BOT@irc.server PRIVMSG " + channel + " :You have been kicked from the channel by " + clients[index].getNickName() + " with the following message -";
 						if (ident2[j + 3])
 						{
@@ -131,14 +143,13 @@ static void channelKick(Client *clients, int &index, char **ident2, int &j)
 					}
 				}
 			}
-			else //errur: pas de permissions operateur
+			else
 			{
 				sendAll(index, ":irc.serv 481 :Permission Denied- You're not an IRC operator.\n");
 				return;
 			}
 		}
 	}
-	// Erreur: le kicker n'est pas dans le channel;
 	sendAll(index,  string(":irc.serv 442 "  + string(ident2[j + 1]) + " :You're not on that channel\n"));
 }
 
@@ -152,6 +163,7 @@ static void channelPart(Client *clients, int &index, char **ident2, int &j)
 		return ;
 	}
 	string channel = string(ident2[j + 1]);
+	cout << ident2[0]<< " "<< ident2[1] << endl;
 	for (vector<string>::iterator it = clients[index].channels.begin(); it != clients[index].channels.end(); it++)
 	{
 		if (*it == channel)
@@ -181,6 +193,7 @@ static void setOper(Client *clients, int &index, char **ident2, int &j)
 		return ;
 	}
 	clients[index].setOp(true);
+	cout << BLU << clients[index].getNickName() << " is now an Operator\n" << END;
 	sendAll(index, ":irc.serv 381 :You are now an IRC operator\n");
 }
 
@@ -198,22 +211,20 @@ static void joinChannel(Client *clients, int &index, char **ident2, int &j)
 		sendAll(index, ":irc.serv 461 " + string(ident2[j]) + " :Not enough parameters\n");
 		return ;
 	}
+	string hashtag = string(ident2[j + 1]);
 	if (ident2[j + 1][0] != '#')
-	{
-		sendAll(index, ":irc.serv 475 " + string(ident2[j + 1]) + " :Cannot join channel\n");
-		return;
-	}
+		hashtag = "#" + hashtag;
 	for (size_t i = 0; i < clients[index].channels.size(); i++)
 	{
 		if (clients[index].channels[i] == string(ident2[j + 1]))
 		{
-			string message = ":irc.server 443 " + string(":") + clients[index].getUserName() + " " + string(ident2[j + 1]) + " :is already on channel\n";
+			string message = ":irc.server 443 " + string(":") + clients[index].getUserName() + " " + hashtag + " :is already on channel\n";
 			sendAll(index, message);
 			return;
 		}
 	}
-	clients[index].channels.push_back(ident2[j + 1]);
-	sendAll(index, ":BOT!BOT@irc.server PRIVMSG " + string(ident2[j + 1]) + " :You successfully joined channel" + string(ident2[j + 1]) + "\n");
+	clients[index].channels.push_back(hashtag);
+	sendAll(index, ":BOT!BOT@irc.server PRIVMSG " + hashtag + " :You successfully joined channel" + hashtag + "\n");
 }
 
 
@@ -326,10 +337,11 @@ static void setNick(Client *clients, int &index, char **ident2, int &j)
 {
 	if (ident2[j + 1] && notEmpty(ident2[j + 1], 0))
 	{
-		if (newNick(ident2[j + 1], clients))
+		if (newNick(ident2[j + 1], clients) && string(ident2[j + 1]) != clients[index].getNickName())
 		{
 			string nick = string(ident2[j + 1]);
 			clients[index].setNickName(nick);
+			cout << GRN << "Client #" << clients[index].getId() - 4 << " nickname is now " << clients[index].getNickName() << endl << END;
 			isConnected(clients[index], index);
 		}
 		else
@@ -349,6 +361,11 @@ static void setNick(Client *clients, int &index, char **ident2, int &j)
 
 static void setUser(Client *clients, int &index, char **ident2, int &j)
 {
+	if (!ident2[j + 1] || !ident2[j + 2] || !ident2[j + 3] || !ident2[j + 4])
+	{
+		sendAll(index, ":irc.serv 461 USER :Not enough parameters\n");
+		return ;
+	}
 	if (!clients[index].getUserName().empty())
 		sendAll(index, ":irc.serv 462 :You may not reregister\n");
 	else if (ident2[j + 1] && notEmpty(ident2[j + 1], 1))
@@ -362,7 +379,7 @@ static void setUser(Client *clients, int &index, char **ident2, int &j)
 /***********************************COMMANDS***********************************/
 
 typedef void (*cmd)(Client*, int&, char**, int &);
-void ft_commands(Client *clients, int &index, const char *bufRead, string &password)
+void ft_commands(Client *clients, int &index, const char *bufRead, string &password, fd_set &active)
 {
 	/* LIST OF COMMANDS WITH THEIR ASSOCIATED FUNCTIONS */
 	map<string, cmd> cmds;
@@ -396,6 +413,8 @@ void ft_commands(Client *clients, int &index, const char *bufRead, string &passw
 				(*it->second)(clients, index, ident2, j);
 			else if (value == "PASS")
 				setPass(clients, index, ident2, j, password);
+			else if (value == "QUIT")
+				quit(clients, index, active);
 			else if (isUpper(value))
 				unknownCommand(index, value);
 	 	}
@@ -411,10 +430,10 @@ void botCommand(Client *clients, int &index, char **ident2, int &j){
 	map<string, string>::iterator it;
 
 	it = command.find(string(ident2[j +2]));
-	string message;	
+	string message;
 	if (it != command.end())
 		message = it -> second;
 	else
-		message = ":BOT!BOT@irc.server PRIVMSG " + clients[index].getNickName() + string(ident2[j +2])+ " -- Unknown command.\n";		
+		message = ":BOT!BOT@irc.server PRIVMSG " + clients[index].getNickName() + string(ident2[j +2])+ " -- Unknown command.\n";
 	sendAll(index, message);
 }

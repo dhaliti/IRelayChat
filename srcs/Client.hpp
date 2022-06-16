@@ -3,17 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cciobanu <cciobanu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 13:39:09 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/16 16:03:35 by cciobanu         ###   ########.fr       */
+/*   Updated: 2022/06/16 18:15:15 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include <iostream>
-#include <string>
+#include "IRC.hpp"
 #include <vector>
 
 using namespace std;

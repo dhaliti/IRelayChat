@@ -6,7 +6,7 @@
 /*   By: cciobanu <cciobanu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/16 14:58:28 by cciobanu          #+#    #+#             */
-/*   Updated: 2022/06/16 16:02:05 by cciobanu         ###   ########.fr       */
+/*   Updated: 2022/06/16 18:21:19 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,19 +31,19 @@ Client & Client::operator=(const Client &other)
 };
 
 int				Client::getId(void) const {
-	return (this -> id);	
+	return (this -> id);
 }
 bool			Client::isOp(void) const {
-	return (this -> op);	
+	return (this -> op);
 }
 bool			Client::isConnected(void) const {
-	return (this -> connected);	
+	return (this -> connected);
 }
 string			Client::getNickName(void) const {
-	return (this -> nickname);	
+	return (this -> nickname);
 }
 string			Client::getUserName(void) const {
-	return (this -> username);	
+	return (this -> username);
 }
 
 void			Client::setOp(bool isOp){
