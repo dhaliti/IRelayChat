@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: cciobanu <cciobanu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:25:05 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 17:53:02 by flcollar         ###   ########.fr       */
+/*   Updated: 2022/06/16 11:58:10 by cciobanu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -404,4 +404,18 @@ void ft_commands(Client *clients, int &index, const char *bufRead, string &passw
 		free(ident[i]);
 	}
 	free (ident);
+}
+
+void botCommand(Client *clients, int &index, char **ident2, int &j){
+	Bot bot = Bot(clients[index].nickname);
+	map<string, string> command = bot.getCommands();
+	map<string, string>::iterator it;
+
+	it = command.find(string(ident2[j +2]));
+	string message;	
+	if (it != command.end())
+		message = it -> second;
+	else
+		message = ":BOT!BOT@irc.server PRIVMSG " + clients[index].nickname + string(ident2[j +2])+ " -- Unknown command.\n";		
+	sendAll(index, message);
 }

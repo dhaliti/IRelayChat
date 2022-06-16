@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   IRC.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
+/*   By: cciobanu <cciobanu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:28:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/16 10:52:17 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/16 11:52:29 by cciobanu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "Client.hpp"
+#include "Bot.hpp"
 #include "Files.hpp"
 #include <signal.h>
-#include <map>
 
 #define NICK 1;
 #define USER 2;
