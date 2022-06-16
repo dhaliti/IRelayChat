@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   IRC.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:28:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 16:41:16 by flcollar         ###   ########.fr       */
+/*   Updated: 2022/06/16 10:52:17 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,3 +57,4 @@ void 	botCommand(Client *clients, int &index, char **ident2, int &j);
 int 	searchUser(Client *clients, string &user);
 void	sendAll(int &dest, string message);
 int		getCmd(string &cmd);
+void 	IRCLoop(Client *clients, fd_set &readyRead, fd_set &readyWrite, fd_set &active, int &_max, int &serverSock, int &next_id, char *bufRead, string &password, socklen_t &addr_len, sockaddr_in &addr);

@@ -13,7 +13,7 @@
 #include "Client.hpp"
 #include "IRC.hpp"
 #include <sys/socket.h>
-#include <map>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
