@@ -5,7 +5,7 @@
 # ==---------------------== #
 
 NAME = ircserv
-ARGS = 8889 pp
+ARGS = 8888 pp
 
 FLAGS = -Wall -Werror -Wextra -std=c++98 -g3
 DANGER = -fsanitize=address

@@ -6,7 +6,7 @@
 /*   By: cciobanu <cciobanu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:25:05 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/16 11:58:10 by cciobanu         ###   ########.fr       */
+/*   Updated: 2022/06/16 14:44:49 by cciobanu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -383,7 +383,6 @@ void ft_commands(Client *clients, int &index, const char *bufRead, string &passw
 	/* RUN ACROSS READ BUFFER AND EXECUTE COMMANDS */
 	int i = -1;
 	int j = -1;
-	cout << "Command: " << bufRead << endl;
 	char **ident = ft_split2(bufRead, "\r\n");
 	while(ident && ident[++i])
 	{

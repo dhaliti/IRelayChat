@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/14 11:09:59 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/14 11:25:12 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/16 11:57:50 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,5 +22,5 @@ void botWelcome(Client &client, int &index)
 void newClient(Client *clients, int &index)
 {
 	clients[index].id = index;
-	//botWelcome(clients, index);
+	cout << "Client #" << clients[index].id - 4 << " just arrived\n";
 }
