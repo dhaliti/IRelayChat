@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: flcollar <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:25:05 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/15 17:53:02 by flcollar         ###   ########.fr       */
+/*   Updated: 2022/06/16 11:21:53 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -383,7 +383,6 @@ void ft_commands(Client *clients, int &index, const char *bufRead, string &passw
 	/* RUN ACROSS READ BUFFER AND EXECUTE COMMANDS */
 	int i = -1;
 	int j = -1;
-	cout << "Command: " << bufRead << endl;
 	char **ident = ft_split2(bufRead, "\r\n");
 	while(ident && ident[++i])
 	{

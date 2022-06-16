@@ -6,16 +6,19 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/16 10:36:00 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/16 11:06:08 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/16 11:58:54 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "IRC.hpp"
 
-void IRCLoop(Client *clients, fd_set &readyRead, fd_set &readyWrite, fd_set &active, int &_max, int &serverSock, int &next_id, char *bufRead, string &password, socklen_t &addr_len, sockaddr_in &addr)
+void IRCLoop(Client *clients, fd_set &readyRead, fd_set &readyWrite, fd_set &active, \
+	int &_max, int &serverSock, int &next_id, char *bufRead, string &password, \
+	socklen_t &addr_len, sockaddr_in &addr)
 {
 	while (1)
 	{
+		(void)next_id;
         readyRead = readyWrite = active;
         if (select(_max + 1, &readyRead, &readyWrite, NULL, NULL) < 0)
             continue ;
@@ -28,12 +31,8 @@ void IRCLoop(Client *clients, fd_set &readyRead, fd_set &readyWrite, fd_set &act
                 if (clientSock < 0)
                     continue ;
                 _max = (clientSock > _max) ? clientSock : _max;
-
-                clients[clientSock].id = next_id++;
-
                 FD_SET(clientSock, &active);
-                cout << "Client #" << clients[clientSock].id << " just arrived";
-                //break ;
+                break ;
             }
 
             if (FD_ISSET(index, &readyRead) && index != serverSock)
@@ -45,9 +44,7 @@ void IRCLoop(Client *clients, fd_set &readyRead, fd_set &readyWrite, fd_set &act
 				cmd += bufRead;
 				if (res <= 0)
 				{
-					string message = ":irc.serv client " + to_string(index) + " just left!\n";
-					for (int i = 0; i < 1024; i++)
-						send(i, message.c_str(), message.size(), 0);
+					cout << "Client #" << clients[index].id - 4 << " just left!\n";
 					FD_CLR(index, &active);
 					clients[index].id = -1;
 					clients[index].nickname = "";
