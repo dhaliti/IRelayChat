@@ -1,4 +1,4 @@
-![42](https://user-images.githubusercontent.com/105823790/174321477-b14f3153-fb05-4d6a-a30a-84dd3f18cd9f.png)
+<img src="https://user-images.githubusercontent.com/105823790/171860148-c0b11827-51de-42e1-8213-e1e83249b081.png" width="150" height="150">
 
 # FT_IRC
 Create your own IRC server in C++, fully compatible with an official client.
