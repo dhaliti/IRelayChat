@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/13 15:22:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/16 18:41:40 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/17 11:34:08 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,19 +42,21 @@ static void Binding(int &serverSock, sockaddr_in &addr, int &port)
 	addr.sin_port = htons(port);
 	fcntl(serverSock, F_SETFL, O_NONBLOCK);
 	if ((bind(serverSock, (const struct sockaddr *)&addr, sizeof(addr))) < 0)
-	   throw out_of_range("Binding failed");
+	   throw out_of_range("[Error] Binding failed");
 	if (listen(serverSock, 128) < 0)
-	   throw out_of_range("Listening failed");
+	   throw out_of_range("[Error] Listening failed");
 }
 
 static void checkArgs(Client *clients, fd_set &active, int &ac, char **av, int &port, string &password)
 {
 	if (ac != 3)
-        throw invalid_argument("Wrong number of arguments\nUsage: ./ircserv port password");
+        throw invalid_argument("[Error] Wrong number of arguments\nUsage: ./ircserv port password");
 	password = string(av[2]);
 	port = atoi(av[1]);
 	if (port <= 0 || port > 65535)
-		throw out_of_range("Port out of range!");
+		throw out_of_range("[Error] Port out of range!");
+	if (password.size() > 8)
+		throw out_of_range("[Error] password too long!");
 	bzero(&clients, sizeof(clients));
 	FD_ZERO(&active);
 }

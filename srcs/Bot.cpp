@@ -6,14 +6,14 @@
 /*   By: cciobanu <cciobanu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/16 11:46:24 by cciobanu          #+#    #+#             */
-/*   Updated: 2022/06/16 18:21:51 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/17 11:37:45 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Bot.hpp"
 
 Bot::Bot(string nickname) : _nickname(nickname){
-	_command[":cmd"] = ":BOT!BOT@irc.server PRIVMSG " + this -> _nickname + " :pass • nick • user • join • quit • part • oper •  kick\n" +
+	_command[":cmd"] = ":BOT!BOT@irc.server PRIVMSG " + this -> _nickname + " :pass • nick • user • join • quit • part • msg • oper •  kick • getfiles • sendfile\n" +
 		":BOT!BOT@irc.server PRIVMSG " + this -> _nickname + " :Type the name of a command to get more info\n";
 	_command[":pass"] = ":BOT!BOT@irc.server PRIVMSG " + this -> _nickname + " : The PASS command is used to set a 'connection password'.The password can and must be set before any attempt to register the connection is made.\n";
 	_command[":nick"] = ":BOT!BOT@irc.server PRIVMSG " + this -> _nickname + " : Nick message is used to give user a nickname or change the previous one.\n";
@@ -23,6 +23,9 @@ Bot::Bot(string nickname) : _nickname(nickname){
 	_command[":kick"] = ":BOT!BOT@irc.server PRIVMSG " + this -> _nickname + " : The KICK command can be  used  to  forcibly  remove  a  user  from  a channel.  It  'kicks  them  out'  of the channel (forced PART). Only a channel operator may kick another user out of a  channel.\n";
 	_command[":oper"] = ":BOT!BOT@irc.server PRIVMSG " + this -> _nickname + " : OPER message is used by a normal user to obtain operator privileges. The combination of <user> and <password> are required to gain Operator privileges.\n";
 	_command[":join"] = ":BOT!BOT@irc.server PRIVMSG " + this -> _nickname + " : The JOIN command is used by client to start listening a specific channel. Whether or not a client is allowed to join a channel is checked only by the server the client is connected to; all other servers automatically add the user to the channel when it is received from other servers.\n";
+	_command[":sendfile"] = ":BOT!BOT@irc.server PRIVMSG " + this -> _nickname + " : The SENDFILE command is used to send a file to another user of the server.\n";
+	_command[":getfiles"] = ":BOT!BOT@irc.server PRIVMSG " + this -> _nickname + " : The GETFILES command is used to retrieve all the files sent by other users.\n";
+	_command[":msg"] = ":BOT!BOT@irc.server PRIVMSG " + this -> _nickname + " : PRIVMSG is used to send private messages between users.\n";
 }
 
 const map<string, string> Bot::getCommands(void){

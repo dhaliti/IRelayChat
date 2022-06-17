@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:25:05 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/16 18:22:00 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/17 11:00:53 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,12 @@ static vector<File> files;
 static void quit(Client *clients, int &index, fd_set & active)
 {
 	cout << RED << "Client #" << clients[index].getId() - 4 << " just left!\n" << END;
-	clients[index].setUserName("");
-	clients[index].setNickName("");
 	clients[index].setId(-1);
+	clients[index].setNickName("");
+	clients[index].setUserName("");
+	clients[index].password = false;
+	clients[index].channels.clear();
+	clients[index].setConnected(false);
 	FD_CLR(index, &active);
 	close(index);
 }
@@ -101,7 +104,8 @@ static void channelKick(Client *clients, int &index, char **ident2, int &j)
 {
 	if (!ident2[j + 1] || !ident2[j + 2])
 	{
-		string error = ":irc.serv 461 " + string(ident2[j]) + " :Not enough parameters\n";
+		cout << ident2[j + 1] << " " << ident2[j + 2] << " " << ident2[j + 3] << endl;
+		string error = ":irc.serv 461 " + string(ident2[j]) + " :Invalid number of parameters\n";
 		sendAll(index, error);
 		return ;
 	}
@@ -110,7 +114,7 @@ static void channelKick(Client *clients, int &index, char **ident2, int &j)
 	int d;
 	if ((d = searchUser(clients, user)) == -1)
 	{
-		cout << "[Error] User " + user + " could not be found\n";
+		sendAll(index, ":BOT!BOT@irc.serv PRIVMSG " + clients[index].getNickName() + " :User you tried to kick could not be found on the channel\n");
 		return;
 	}
 	for (size_t i = 0; i < clients[index].channels.size(); i++)
@@ -136,10 +140,14 @@ static void channelKick(Client *clients, int &index, char **ident2, int &j)
 								message += " ";
 							}
 							message += "\n";
+							sendAll(d, message);
+							return ;
 						}
 						else
-						sendAll(d, message + " Your behavior is not conducive to the desired environment.\n");
-						return;
+						{
+							sendAll(d, message + " Your behavior is not conducive to the desired environment.\n");
+							return;
+						}
 					}
 				}
 			}
@@ -163,7 +171,6 @@ static void channelPart(Client *clients, int &index, char **ident2, int &j)
 		return ;
 	}
 	string channel = string(ident2[j + 1]);
-	cout << ident2[0]<< " "<< ident2[1] << endl;
 	for (vector<string>::iterator it = clients[index].channels.begin(); it != clients[index].channels.end(); it++)
 	{
 		if (*it == channel)
@@ -262,7 +269,7 @@ static void channelMessage(Client *clients, int &index, char **ident2, int &j)
 				{
 					for (size_t m = 0; m < clients[l].channels.size(); m++)
 					{
-						if (clients[l].channels[i] == channel && l != index)
+						if (clients[l].channels[m] == channel && l != index)
 							send(l, message.c_str(), message.size(), 0);
 					}
 				}
@@ -299,7 +306,6 @@ static void personnalMessage(Client *clients, int &index, char **ident2, int &j)
 
 static void privateMsg(Client *clients, int &index, char **ident2, int &j)
 {
-	cout << "privateMessage\n";
 	if (ident2[j + 1] && ident2[j + 2])
 	{
 		if (string(ident2[j + 1]) == "BOT")
