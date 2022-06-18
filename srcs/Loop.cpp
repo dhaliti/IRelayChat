@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/16 10:36:00 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/17 11:41:17 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/18 16:46:48 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ void IRCLoop(Client *clients, fd_set &readyRead, fd_set &readyWrite, fd_set &act
 					clients[index].password = false;
 					clients[index].channels.clear();
 					clients[index].setConnected(false);
+					clients[index].setOp(false);
 					close(index);
 					break ;
 				}

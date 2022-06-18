@@ -6,13 +6,158 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:25:05 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/17 11:00:53 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/18 18:50:29 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "IRC.hpp"
 
 static vector<File> files;
+
+/*************************************KILL*************************************/
+
+static void killUser(Client *clients, int &index, char **ident2, int &j, fd_set &active)
+{
+	if (clients[index].isConnected() == false)
+	{
+		sendAll(index, ":irc.serv 444 user :User not logged in\n");
+		return ;
+	}
+	if (!ident2[j + 1])
+	{
+		sendAll(index, ":irc.serv 461 KILL :Not enough parameters\n");
+		return;
+	}
+	if (clients[index].isOp() == false)
+	{
+		sendAll(index, ":irc.serv 481 :Permission Denied- You're not an IRC operator.\n");
+		return;
+	}
+	int d;
+	string user = string(ident2[j + 1]);
+	if ((d = searchUser(clients, user)) == -1)
+	{
+		sendAll(index, ":BOT!BOT@irc.serv PRIVMSG " + clients[index].getNickName() + " :User you tried to kick could not be found on the channel\n");
+		return;
+	}
+	cout << RED << "Client #" << clients[d].getId() - 4 << " has been removed from the server by operator " + clients[index].getNickName() + "\n" << END;
+	sendAll(d, ":BOT!BOT@irc.serv NOTICE " + clients[d].getNickName() + " :You have been removed from the server by operator " + clients[index].getNickName() + "\n");
+	clients[d].setId(-1);
+	clients[d].setNickName("");
+	clients[d].setUserName("");
+	clients[d].password = false;
+	clients[d].channels.clear();
+	clients[d].setConnected(false);
+	clients[d].setOp(false);
+	FD_CLR(d, &active);
+	close(d);
+}
+
+/**********************************SET TOPIC***********************************/
+
+static void setTopic(Client *clients, int &index, char **ident2, int &j)
+{
+	if (clients[index].isConnected() == false)
+	{
+		sendAll(index, ":irc.serv 444 user :User not logged in\n");
+		return ;
+	}
+	if (!ident2[j + 1] || !ident2[j + 2] || ident2[j + 3])
+	{
+		sendAll(index, ":irc.serv 461 TOPIC :Not enough parameters\n");
+		return;
+	}
+	if (clients[index].isOp() == false)
+	{
+		sendAll(index, ":irc.serv 481 :Permission Denied- You're not an IRC operator.\n");
+		return;
+	}
+	string channel = string(ident2[j + 1]);
+	string name = string(ident2[j + 2]);
+	for (vector<string>::iterator it = clients[index].channels.begin(); it != clients[index].channels.end(); it++)
+	{
+		if (*it == channel)
+		{
+			for (int i = 0; i < 1024; i++)
+			{
+				if (clients[i].getId() != -1 && clients[i].getId() != 0)
+				sendAll(i, ":" + clients[index].getNickName() + " TOPIC " + channel + " " + name + "\n");
+			}
+			return;
+		}
+	}
+	sendAll(index,  string(":irc.serv 442 "  + string(ident2[j + 1]) + " :You're not on that channel\n"));
+
+
+}
+
+/************************************NOTICE************************************/
+
+static void channelNotice(Client *clients, int &index, char **ident2, int &j)
+{
+	string channel = string(ident2[j + 1]);
+	for (size_t i = 0; i < clients[index].channels.size(); i++)
+	{
+		if (clients[index].channels[i] == channel)
+		{
+			string message = ":" + clients[index].getNickName() + "!" + clients[index].getUserName() + "@irc.server" + " NOTICE " + channel;
+			int k = 1;
+			while (ident2[++k + j])
+			{
+				message += " ";
+				message += ident2[k + j];
+			}
+			message += "\n";
+			for (int l = 0; l < 1024; l++)
+			{
+				for (size_t m = 0; m < clients[l].channels.size(); m++)
+				{
+					if (clients[l].channels[m] == channel && l != index)
+						send(l, message.c_str(), message.size(), 0);
+				}
+			}
+			return;
+		}
+	}
+}
+
+static void personnalNotice(Client *clients, int &index, char **ident2, int &j)
+{
+	string nick = string(ident2[j + 1]);
+	int d = searchNick(clients, nick);
+	if (d == -1)
+		return ;
+	else
+	{
+		string message = ":" + clients[index].getNickName() + "!" + clients[index].getUserName() + "@irc.server" + " NOTICE " + nick;
+		int i = 1;
+		while (ident2[++i + j])
+		{
+			message += " ";
+			message += ident2[i + j];
+		}
+		message	+= "\n";
+		sendAll(d, message);
+	}
+}
+
+static void noticeMsg(Client *clients, int &index, char **ident2, int &j)
+{
+	if (clients[index].isConnected() == false)
+	{
+		sendAll(index, ":irc.serv 444 user :User not logged in\n");
+		return ;
+	}
+	if (ident2[j + 1] && ident2[j + 2])
+	{
+		if (ident2[j + 1][0] == '#')
+			channelNotice(clients, index, ident2, j);
+		else
+			personnalNotice(clients, index, ident2, j);
+	}
+}
+
+/*************************************QUIT*************************************/
 
 static void quit(Client *clients, int &index, fd_set & active)
 {
@@ -23,12 +168,20 @@ static void quit(Client *clients, int &index, fd_set & active)
 	clients[index].password = false;
 	clients[index].channels.clear();
 	clients[index].setConnected(false);
+	clients[index].setOp(false);
 	FD_CLR(index, &active);
 	close(index);
 }
 
+/***********************************GETFILES***********************************/
+
 static void getFile(Client *clients, int &index, char **ident2, int &j)
 {
+	if (clients[index].isConnected() == false)
+	{
+		sendAll(index, ":irc.serv 444 user :User not logged in\n");
+		return ;
+	}
 	int hasContent = 0;
 	for (size_t i = 0; i < files.size(); i++)
 	{
@@ -59,6 +212,11 @@ static void getFile(Client *clients, int &index, char **ident2, int &j)
 
 static void sendFile(Client *clients, int &index, char **ident2, int &j)
 {
+	if (clients[index].isConnected() == false)
+	{
+		sendAll(index, ":irc.serv 444 user :User not logged in\n");
+		return ;
+	}
 	if (!ident2[j + 1] || !ident2[j + 2])
 	{
 		sendAll(index, ":irc.serv 461 " + string(ident2[j]) + " :Not enough parameters\n");
@@ -86,6 +244,7 @@ static void sendFile(Client *clients, int &index, char **ident2, int &j)
 	sendAll(d, ":BOT!BOT@irc.server PRIVMSG " + target + " :" + clients[index].getNickName() + " has sent you a file " + name + "\n");
 }
 
+/*************************************PING*************************************/
 
 static void pingPong(Client*, int &index, char **ident2, int &j)
 {
@@ -102,6 +261,11 @@ static void pingPong(Client*, int &index, char **ident2, int &j)
 
 static void channelKick(Client *clients, int &index, char **ident2, int &j)
 {
+	if (clients[index].isConnected() == false)
+	{
+		sendAll(index, ":irc.serv 444 user :User not logged in\n");
+		return ;
+	}
 	if (!ident2[j + 1] || !ident2[j + 2])
 	{
 		cout << ident2[j + 1] << " " << ident2[j + 2] << " " << ident2[j + 3] << endl;
@@ -111,6 +275,11 @@ static void channelKick(Client *clients, int &index, char **ident2, int &j)
 	}
 	string user = string(ident2[j + 2]);
 	string channel = string(ident2[j + 1]);
+	if (clients[index].isOp() == false)
+	{
+		sendAll(index, ":irc.serv 481 :Permission Denied- You're not an IRC operator.\n");
+		return;
+	}
 	int d;
 	if ((d = searchUser(clients, user)) == -1)
 	{
@@ -121,40 +290,32 @@ static void channelKick(Client *clients, int &index, char **ident2, int &j)
 	{
 		if (clients[index].channels[i] == channel)
 		{
-			if (clients[index].isOp() == true)
+			for (vector<string>::iterator it = clients[d].channels.begin(); it != clients[d].channels.end(); it++)
 			{
-				for (vector<string>::iterator it = clients[d].channels.begin(); it != clients[d].channels.end(); it++)
+				if (*it == channel)
 				{
-					if (*it == channel)
+					clients[d].channels.erase(it);
+					string message = ":BOT!BOT@irc.server NOTICE " + channel + " :You have been kicked from the channel by " + clients[index].getNickName() + " with the following message -";
+					if (ident2[j + 3])
 					{
-						clients[d].channels.erase(it);
-						string message = ":BOT!BOT@irc.server PRIVMSG " + channel + " :You have been kicked from the channel by " + clients[index].getNickName() + " with the following message -";
-						if (ident2[j + 3])
+						int k = 2;
+						while(ident2[++k + j])
 						{
-							int k = 2;
-							while(ident2[++k + j])
-							{
-								if (ident2[k + j][0] == ':')
-									ident2[k + j][0] = ' ';
-								message += ident2[k + j];
-								message += " ";
-							}
-							message += "\n";
-							sendAll(d, message);
-							return ;
+							if (ident2[k + j][0] == ':')
+								ident2[k + j][0] = ' ';
+							message += ident2[k + j];
+							message += " ";
 						}
-						else
-						{
-							sendAll(d, message + " Your behavior is not conducive to the desired environment.\n");
-							return;
-						}
+						message += "\n";
+						sendAll(d, message);
+						return ;
+					}
+					else
+					{
+						sendAll(d, message + " Your behavior is not conducive to the desired environment.\n");
+						return;
 					}
 				}
-			}
-			else
-			{
-				sendAll(index, ":irc.serv 481 :Permission Denied- You're not an IRC operator.\n");
-				return;
 			}
 		}
 	}
@@ -165,6 +326,11 @@ static void channelKick(Client *clients, int &index, char **ident2, int &j)
 
 static void channelPart(Client *clients, int &index, char **ident2, int &j)
 {
+	if (clients[index].isConnected() == false)
+	{
+		sendAll(index, ":irc.serv 444 user :User not logged in\n");
+		return ;
+	}
 	if (!ident2[j + 1])
 	{
 		sendAll(index, ":irc.serv 461 PART :Not enough parameters\n");
@@ -189,6 +355,11 @@ static void channelPart(Client *clients, int &index, char **ident2, int &j)
 
 static void setOper(Client *clients, int &index, char **ident2, int &j)
 {
+	if (clients[index].isConnected() == false)
+	{
+		sendAll(index, ":irc.serv 444 user :User not logged in\n");
+		return ;
+	}
 	if (!ident2[j + 1] || !ident2[j + 2])
 	{
 		sendAll(index, ":irc.serv 461 OPER :Not enough parameters\n");
@@ -210,8 +381,8 @@ static void joinChannel(Client *clients, int &index, char **ident2, int &j)
 {
 	if (clients[index].isConnected() == false)
 	{
-		sendAll(index, ":irc.serv 444 " + clients[index].getUserName() + ":User not logged in\n");
-		return;
+		sendAll(index, ":irc.serv 444 user :User not logged in\n");
+		return ;
 	}
 	if (!ident2[j + 1])
 	{
@@ -306,6 +477,11 @@ static void personnalMessage(Client *clients, int &index, char **ident2, int &j)
 
 static void privateMsg(Client *clients, int &index, char **ident2, int &j)
 {
+	if (clients[index].isConnected() == false)
+	{
+		sendAll(index, ":irc.serv 444 user :User not logged in\n");
+		return ;
+	}
 	if (ident2[j + 1] && ident2[j + 2])
 	{
 		if (string(ident2[j + 1]) == "BOT")
@@ -397,11 +573,12 @@ void ft_commands(Client *clients, int &index, const char *bufRead, string &passw
 	cmds["JOIN"] = &joinChannel;
 	cmds["PART"] = &channelPart;
 	cmds["KICK"] = &channelKick;
-	cmds["NOTICE"] = &privateMsg;
+	cmds["NOTICE"] = &noticeMsg;
 	cmds["PRIVMSG"] = &privateMsg;
 	cmds["CLIENTS"] = &ft_clients;
 	cmds["SENDFILE"] = &sendFile;
 	cmds["GETFILES"] = &getFile;
+	cmds["TOPIC"] = &setTopic;
 
 	/* RUN ACROSS READ BUFFER AND EXECUTE COMMANDS */
 	int i = -1;
@@ -421,6 +598,8 @@ void ft_commands(Client *clients, int &index, const char *bufRead, string &passw
 				setPass(clients, index, ident2, j, password);
 			else if (value == "QUIT")
 				quit(clients, index, active);
+			else if (value == "KILL")
+				killUser(clients, index, ident2, j, active);
 			else if (isUpper(value))
 				unknownCommand(index, value);
 	 	}
