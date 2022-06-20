@@ -6,7 +6,7 @@
 #    By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/14 01:08:17 by dhaliti           #+#    #+#              #
-#    Updated: 2022/06/18 18:47:26 by dhaliti          ###   ########.fr        #
+#    Updated: 2022/06/20 11:53:02 by dhaliti          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,7 @@ RED			= \033[0;31m
 RST			= \033[0m
 END			= \e[0m
 
-SRCS		= srcs/main.cpp srcs/Bot.cpp srcs/Client.cpp srcs/Commands.cpp srcs/Files.cpp srcs/Loop.cpp srcs/newClient.cpp srcs/Utils.cpp
+SRCS		= srcs/main.cpp srcs/Bot.cpp srcs/Client.cpp srcs/Commands.cpp srcs/Files.cpp srcs/Loop.cpp srcs/Utils.cpp srcs/Connect.cpp srcs/Message.cpp srcs/Notice.cpp srcs/Mode.cpp srcs/Disconnect.cpp srcs/Topic.cpp srcs/Transfert.cpp
 NAME		= ircserv
 OBJS_DIR	= objs/
 OBJS		= $(SRCS:.cpp=.o)

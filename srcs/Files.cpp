@@ -6,11 +6,11 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/16 18:11:21 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/16 18:22:10 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/20 11:51:20 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Files.hpp"
+#include "../includes/Files.hpp"
 
 File::File(const string &name, const string &content,
 	const string &sender, const string &dest)

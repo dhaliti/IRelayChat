@@ -6,11 +6,11 @@
 /*   By: cciobanu <cciobanu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/16 11:46:24 by cciobanu          #+#    #+#             */
-/*   Updated: 2022/06/17 11:37:45 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/20 11:49:35 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Bot.hpp"
+#include "../includes/Bot.hpp"
 
 Bot::Bot(string nickname) : _nickname(nickname){
 	_command[":cmd"] = ":BOT!BOT@irc.server PRIVMSG " + this -> _nickname + " :pass • nick • user • join • quit • part • msg • oper •  kick • getfiles • sendfile\n" +

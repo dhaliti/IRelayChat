@@ -6,11 +6,11 @@
 /*   By: cciobanu <cciobanu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/16 14:58:28 by cciobanu          #+#    #+#             */
-/*   Updated: 2022/06/16 18:21:19 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/20 11:49:34 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Client.hpp"
+#include "../includes/Client.hpp"
 
 Client::Client(void) : password(false), id(0), op(false), nickname(""), username(""), connected(false) {
 }

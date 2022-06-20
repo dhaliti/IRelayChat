@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:28:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/16 18:21:01 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/20 11:42:55 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,3 +61,35 @@ void	sendAll(int &, string);
 int		getCmd(string &);
 void 	IRCLoop(Client *, fd_set &, fd_set &, fd_set &, int &, int &, int &, \
 					char *, string &, socklen_t &, sockaddr_in &);
+
+/* Connect */
+void	setPass(Client *clients, int &index, char **ident2, int &j, string &password);
+void	setNick(Client *clients, int &index, char **ident2, int &j);
+void	setUser(Client *clients, int &index, char **ident2, int &j);
+void	joinChannel(Client *clients, int &index, char **ident2, int &j);
+
+/* Message */
+void	privateMsg(Client *clients, int &index, char **ident2, int &j);
+void	personnalMessage(Client *clients, int &index, char **ident2, int &j);
+void	channelMessage(Client *clients, int &index, char **ident2, int &j);
+
+/* Notice */
+void	noticeMsg(Client *clients, int &index, char **ident2, int &j);
+
+/* Mode */
+void	setMode(Client *clients, int &index, char **ident2, int &j);
+void 	setOper(Client *clients, int &index, char **ident2, int &j);
+
+/* Disconnect */
+void	killUser(Client *clients, int &index, char **ident2, int &j, fd_set &active);
+void	quit(Client *clients, int &index, fd_set & active);
+void	channelKick(Client *clients, int &index, char **ident2, int &j);
+void	channelPart(Client *clients, int &index, char **ident2, int &j);
+void 	pingPong(Client*, int &index, char **ident2, int &j);
+
+/* Topic */
+void	setTopic(Client *clients, int &index, char **ident2, int &j);
+
+/* Transfert */
+void	sendFile(Client *clients, int &index, char **ident2, int &j);
+void	getFile(Client *clients, int &index, char **ident2, int &j);

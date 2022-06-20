@@ -6,11 +6,24 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/16 10:36:00 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/18 16:46:48 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/20 11:52:28 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "IRC.hpp"
+#include "../includes/IRC.hpp"
+
+void botWelcome(Client &client, int &index)
+{
+	string message = ":BOT!BOT@irc.server PRIVMSG " + client.getNickName() + " :Welcome to this IRC Server. I am the BOT assistant here to help you. To show the list of commands, simply type <cmd> in this chat window\n";
+	send(index, message.c_str(), message.size(), 0);
+}
+
+
+void newClient(Client *clients, int &index)
+{
+	clients[index].setId(index);
+	cout <<  "Client #" << clients[index].getId() - 4 << " just arrived\n";
+}
 
 void IRCLoop(Client *clients, fd_set &readyRead, fd_set &readyWrite, fd_set &active, \
 	int &_max, int &serverSock, int &next_id, char *bufRead, string &password, \
