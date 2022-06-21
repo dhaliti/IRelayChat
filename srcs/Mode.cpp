@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/20 11:28:50 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/20 11:49:37 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/21 15:27:24 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@ void setMode(Client *clients, int &index, char **ident2, int &j)
 {
 	if (clients[index].isConnected() == false)
 	{
-		cout << "notlogged\n";
 		sendAll(index, ":irc.serv 444 user :User not logged in\n");
 		return;
 	}
@@ -29,15 +28,13 @@ void setMode(Client *clients, int &index, char **ident2, int &j)
 	}
 	if (clients[index].isOp() == false)
 	{
-		cout << "notOP\n";
 		sendAll(index, ":irc.serv 481 :Permission Denied- You're not an IRC operator.\n");
 		return;
 	}
 	string op = ident2[j + 2];
 	if (op.size() != 2 || (op[0] != '+' && op[0] != '-') || op[1] != 'o')
 	{
-		cout << "unknown char\n";
-		sendAll(index, ":irc.serv 472  :is unknown mode char to me");
+		sendAll(index, ":irc.serv 472  :unknown mode\n");
 		return;
 	}
 	string nick = string(ident2[j + 1]);
@@ -45,7 +42,6 @@ void setMode(Client *clients, int &index, char **ident2, int &j)
 	d = searchNick(clients, nick);
 	if (d == -1)
 	{
-		cout << "noSuchUser\n";
 		sendAll(index, ":irc.serv 401 " + nick + " :No such user\n");
 		return ;
 	}
@@ -55,7 +51,7 @@ void setMode(Client *clients, int &index, char **ident2, int &j)
 		{
 			clients[d].setOp(true);
 			sendAll(d, ":irc.serv 381 :You are now an IRC operator\n");
-			cout << BLU << clients[d].getNickName() << " is now an operator" << END << endl;
+			cout << BLU << clients[d].getNickName() << " is now an Operator" << END << endl;
 			return;
 		}
 	}
@@ -64,6 +60,7 @@ void setMode(Client *clients, int &index, char **ident2, int &j)
 		if (clients[d].isOp() == true)
 		{
 			clients[d].setOp(false);
+			sendAll(d, ":BOT!BOT@irc.server NOTICE " + clients[d].getNickName() + " :Operator " + clients[index].getNickName() + " discharged you from your operator privileges.\n");
 			cout << clients[d].getNickName() << " is no longer an Operator\n";
 			return;
 		}
