@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/16 10:36:00 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/20 11:52:28 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/30 12:26:47 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,13 +39,11 @@ static void clientLeft(Client *clients, int &index, fd_set &active)
 	close(index);
 }
 
-void IRCLoop(fd_set &active, int &serverSock, string &password, sockaddr_in &addr)
+void IRCLoop(Client *clients, fd_set &active, int &serverSock, string &password, sockaddr_in &addr, int &_max)
 {
-	int _max = 0;
 	fd_set readyRead;
 	fd_set readyWrite;
 	char bufRead[1024];
-	Client clients[1024];
 	socklen_t addr_len = sizeof(addr);
 
 	while (1)

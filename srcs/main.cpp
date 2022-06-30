@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/13 15:22:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/20 11:49:49 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/30 12:24:57 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,10 +63,12 @@ static void checkArgs(Client *clients, fd_set &active, int &ac, char **av, int &
 
 int main(int ac, char **av)
 {
+	int _max = 0;
 	int port;
-	string password;
 	int serverSock;
+	string password;
 	struct sockaddr_in addr;
+	Client clients[1024];
 
 	try
 	{
@@ -74,7 +76,7 @@ int main(int ac, char **av)
 		Socketting(serverSock, _max);
 		Binding(serverSock, addr, port);
 		signal(SIGINT, force_quit);
-		IRCLoop(active, serverSock, password, addr);
+		IRCLoop(clients, active, serverSock, password, addr, _max);
 	}
 
 	catch(exception &e)

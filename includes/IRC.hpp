@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/10 16:28:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/20 11:42:55 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/06/30 12:25:45 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ void 	botCommand(Client *, int &, char **, int &);
 int 	searchUser(Client *, string &);
 void	sendAll(int &, string);
 int		getCmd(string &);
-void 	IRCLoop(fd_set &, int &, string &, sockaddr_in &);
+void 	IRCLoop(Client *, fd_set &, int &, string &, sockaddr_in &, int &);
 
 /* Connect */
 void	setPass(Client *clients, int &index, char **ident2, int &j, string &password);
