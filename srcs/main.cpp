@@ -63,17 +63,10 @@ static void checkArgs(Client *clients, fd_set &active, int &ac, char **av, int &
 
 int main(int ac, char **av)
 {
-	int _max = 0;
-	int next_id = 0;
-	fd_set readyRead;
-	fd_set readyWrite;
-	char bufRead[1024];
-	Client clients[1024];
 	int port;
 	string password;
 	int serverSock;
 	struct sockaddr_in addr;
-	socklen_t addr_len = sizeof(addr);
 
 	try
 	{
@@ -81,7 +74,7 @@ int main(int ac, char **av)
 		Socketting(serverSock, _max);
 		Binding(serverSock, addr, port);
 		signal(SIGINT, force_quit);
-		IRCLoop(clients, readyRead, readyWrite, active, _max, serverSock, next_id, bufRead, password, addr_len, addr);
+		IRCLoop(active, serverSock, password, addr);
 	}
 
 	catch(exception &e)

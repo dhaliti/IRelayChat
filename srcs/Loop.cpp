@@ -25,13 +25,31 @@ void newClient(Client *clients, int &index)
 	cout <<  "Client #" << clients[index].getId() - 4 << " just arrived\n";
 }
 
-void IRCLoop(Client *clients, fd_set &readyRead, fd_set &readyWrite, fd_set &active, \
-	int &_max, int &serverSock, int &next_id, char *bufRead, string &password, \
-	socklen_t &addr_len, sockaddr_in &addr)
+static void clientLeft(Client *clients, int &index, fd_set &active)
 {
+	cout << RED << "Client #" << clients[index].getId() - 4 << " just left!\n" << END;
+	FD_CLR(index, &active);
+	clients[index].setId(-1);
+	clients[index].setNickName("");
+	clients[index].setUserName("");
+	clients[index].password = false;
+	clients[index].channels.clear();
+	clients[index].setConnected(false);
+	clients[index].setOp(false);
+	close(index);
+}
+
+void IRCLoop(fd_set &active, int &serverSock, string &password, sockaddr_in &addr)
+{
+	int _max = 0;
+	fd_set readyRead;
+	fd_set readyWrite;
+	char bufRead[1024];
+	Client clients[1024];
+	socklen_t addr_len = sizeof(addr);
+
 	while (1)
 	{
-		(void)next_id;
         readyRead = readyWrite = active;
         if (select(_max + 1, &readyRead, &readyWrite, NULL, NULL) < 0)
             continue ;
@@ -57,16 +75,7 @@ void IRCLoop(Client *clients, fd_set &readyRead, fd_set &readyWrite, fd_set &act
 				cmd += bufRead;
 				if (res <= 0)
 				{
-					cout << RED << "Client #" << clients[index].getId() - 4 << " just left!\n" << END;
-					FD_CLR(index, &active);
-					clients[index].setId(-1);
-					clients[index].setNickName("");
-					clients[index].setUserName("");
-					clients[index].password = false;
-					clients[index].channels.clear();
-					clients[index].setConnected(false);
-					clients[index].setOp(false);
-					close(index);
+					clientLeft(clients, index, active);
 					break ;
 				}
 				else

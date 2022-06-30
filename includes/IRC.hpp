@@ -59,8 +59,7 @@ void 	botCommand(Client *, int &, char **, int &);
 int 	searchUser(Client *, string &);
 void	sendAll(int &, string);
 int		getCmd(string &);
-void 	IRCLoop(Client *, fd_set &, fd_set &, fd_set &, int &, int &, int &, \
-					char *, string &, socklen_t &, sockaddr_in &);
+void 	IRCLoop(fd_set &, int &, string &, sockaddr_in &);
 
 /* Connect */
 void	setPass(Client *clients, int &index, char **ident2, int &j, string &password);
