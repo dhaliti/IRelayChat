@@ -6,7 +6,7 @@
 /*   By: dhaliti <dhaliti@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/13 15:22:25 by dhaliti           #+#    #+#             */
-/*   Updated: 2022/06/30 12:24:57 by dhaliti          ###   ########.fr       */
+/*   Updated: 2022/07/04 11:58:41 by dhaliti          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ void force_quit(int)
 		close(i);
 	}
 	exit (0);
+
 }
 
 static void Socketting(int &serverSock, int &_max)
@@ -63,12 +64,12 @@ static void checkArgs(Client *clients, fd_set &active, int &ac, char **av, int &
 
 int main(int ac, char **av)
 {
+	Client clients[1024];
 	int _max = 0;
 	int port;
 	int serverSock;
 	string password;
 	struct sockaddr_in addr;
-	Client clients[1024];
 
 	try
 	{
