@@ -1,5 +1,5 @@
 
-# IRelay-chat
+# IRelayChat
 This project is a simple and lightweight implementation of an IRC server written in C++98. It is fully compatible with an official client.
 The IRC Server supports basic IRC functionality, including the ability to join and leave channels, send and receive messages, and handle user commands.
 
